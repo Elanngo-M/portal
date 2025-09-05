@@ -1,12 +1,17 @@
 import "server-only"
 import fs from "fs";
 import path from "path";
-const USERS_FILE = path.join(process.cwd() + "/src/app/data/","users.json");
 
-export async function filereader() {
-    if (!fs.existsSync(USERS_FILE)) return [];
+export async function filereader(role:any) {
+    let mfile = null;
+    if(role == "student"){
+        mfile = path.join(process.cwd() + "/src/app/data/","students.json");
+    }else{
+        mfile = path.join(process.cwd() + "/src/app/data/","teachers.json");
+    }
+    if (!fs.existsSync(mfile)) return [];
     try{
-        const file:any = fs.readFileSync(USERS_FILE);
+        const file:any = fs.readFileSync(mfile);
         const data = JSON.parse(file);
         return data;
     }catch(error){
@@ -15,14 +20,20 @@ export async function filereader() {
     return [];
 }
 
-export async function filewriter(data :any) { 
-    let mydata = await filereader();
+export async function filewriter(data :any, role:any) { 
+    let mydata = await filereader(role);
     mydata = JSON.stringify([...mydata , data]);
-    fs.writeFileSync(USERS_FILE,mydata);
+    let mfile = null;
+    if(role == "student"){
+        mfile = path.join(process.cwd() + "/src/app/data/","students.json");
+    }else{
+        mfile = path.join(process.cwd() + "/src/app/data/","teachers.json");
+    }
+    fs.writeFileSync(mfile,mydata);
 }
 
-export async function useRegisterd(email:any){
-    let users = await filereader();
+export async function userRegisterd(email:any , role:any){
+    let users = await filereader(role);
     if (users.some((u: any) => u.email === email)){
         return true;
     }else{

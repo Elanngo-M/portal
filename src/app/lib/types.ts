@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { any, z } from 'zod'
  
 export const SignupFormSchema = z.object({
   name: z
@@ -15,6 +15,12 @@ export const SignupFormSchema = z.object({
       message: 'Contain at least one special character.',
     })
     .trim(),
+  role: z
+  .string()
+  .trim(),
+  subject: z
+  .string()
+  .trim(),
 })
 
 export const LoginFormSchema = z.object({
@@ -28,6 +34,9 @@ export const LoginFormSchema = z.object({
       message: 'Contain at least one special character.',
     })
     .trim(),
+    role: z
+  .string()
+  .trim(),
 })
  
 export type FormState =

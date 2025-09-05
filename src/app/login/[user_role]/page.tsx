@@ -1,13 +1,20 @@
 'use client'
  
-import { login, signup } from '@/app/actions/action'
+import { Login, signup } from '@/app/actions/auth'
 import { useActionState } from 'react'
+import { use } from 'react'
  
-export default function LoginForm() {
-  const [state, action, pending] = useActionState(login, undefined)
+export default function LoginForm({
+  params,
+}: {
+  params: Promise<{ user_role: string }>
+}) {
+  const { user_role } =use(params);
+  const [state, action, pending] = useActionState(Login, undefined)
  
   return (
     <form action={action}>
+      <p>{user_role} Form</p>
       <div>
         <label htmlFor="email">Email</label>
         <input id="email" name="email" placeholder="Email" />
@@ -28,6 +35,7 @@ export default function LoginForm() {
           </ul>
         </div>
       )}
+      <input id="role" name="role" type='text' readOnly hidden value={user_role=="teacher"? "teacher":"student"}/>
       <button disabled={pending} type="submit">
         Login
       </button>
