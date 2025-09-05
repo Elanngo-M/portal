@@ -12,6 +12,7 @@ export async function signup(state: FormState, formData: FormData) {
     email: formData.get('email'),
     password: formData.get('password'),
     role: formData.get('role'),
+    subject : formData.get('subject')
   })
  
   // If any form fields are invalid, return early
@@ -21,7 +22,7 @@ export async function signup(state: FormState, formData: FormData) {
     }
   }
  
-  const { name, email, password, role } = validatedFields.data
+  const { name, email, password, role, subject } = validatedFields.data
   const isOld = await userRegisterd(email, role);
   if(!isOld){
       await filewriter(validatedFields.data, role);

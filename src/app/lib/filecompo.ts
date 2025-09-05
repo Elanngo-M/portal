@@ -20,6 +20,11 @@ export async function filereader(role:any) {
     return [];
 }
 
+export async function getUserData(email: string, role: string) {
+    const users = await filereader(role);
+    return users.find((user: any) => user.email === email) || null;
+}
+
 export async function filewriter(data :any, role:any) { 
     let mydata = await filereader(role);
     mydata = JSON.stringify([...mydata , data]);

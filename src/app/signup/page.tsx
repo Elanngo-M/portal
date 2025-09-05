@@ -36,7 +36,7 @@ export default function SignupForm() {
       )}
     <div>
       <label htmlFor="role">Role</label>
-      <select value={role} id="role" name="role">
+      <select onChange={e => setRole(e.target.value as "teacher" | "student")} value={role} id="role" name="role">
         <option value="teacher">Teacher</option>
         <option value="student">Student</option>
       </select>
