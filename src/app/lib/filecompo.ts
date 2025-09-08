@@ -2,9 +2,15 @@ import "server-only"
 import fs from "fs";
 import path from "path";
 
-export async function filereader(role:any) {
+export async function filereader(role:any , datafile= false ) {
     let mfile = null;
-    if(role == "student"){
+    if(datafile){
+        if(role== "student"){
+            mfile = path.join(process.cwd() + "/src/app/data/" + "students-data.json");
+        }else{
+            mfile = path.join(process.cwd() + "/src/app/data/" + "teachers-data.json");
+        }
+    }else if(role == "student" && !datafile){
         mfile = path.join(process.cwd() + "/src/app/data/","students.json");
     }else{
         mfile = path.join(process.cwd() + "/src/app/data/","teachers.json");
@@ -20,16 +26,24 @@ export async function filereader(role:any) {
     return [];
 }
 
-export async function getUserData(email: string, role: string) {
-    const users = await filereader(role);
+export async function getUserData(email: string, role: string , datafile=false) {
+    const users = await filereader(role , datafile);
+    console.log(users);
     return users.find((user: any) => user.email === email) || null;
 }
 
-export async function filewriter(data :any, role:any) { 
-    let mydata = await filereader(role);
+export async function filewriter(data :any, role:any , datafile = false) { 
+    let mydata = await filereader(role, datafile);
     mydata = JSON.stringify([...mydata , data]);
     let mfile = null;
-    if(role == "student"){
+    if(datafile){
+        if(role == "student"){
+             mfile = path.join(process.cwd() + "/src/app/data/","students-data.json");
+        }else{
+            mfile = path.join(process.cwd() + "/src/app/data/","teachers-data.json");
+        }
+    }
+    else if(role == "student"){
         mfile = path.join(process.cwd() + "/src/app/data/","students.json");
     }else{
         mfile = path.join(process.cwd() + "/src/app/data/","teachers.json");
@@ -45,3 +59,4 @@ export async function userRegisterd(email:any , role:any){
         return false;
     }
 }
+

@@ -39,13 +39,27 @@ export const LoginFormSchema = z.object({
   .trim(),
 })
  
-export type FormState =
-  | {
-      errors?: {
-        name?: string[] | ""
-        email?: string[] | ""
-        password?: string[] | ""
-      }
-      message?: string
-    }
-  | undefined
+export type FormState = | {
+  errors?: {
+    email?: string[];
+    password?: string[];
+    role?: string[];
+  } | undefined;
+  success?: boolean | false;
+  userData?:{
+    data: any
+  };
+} | undefined;
+
+export type SingupFormState = | {
+  errors?: {
+    name?:string[];
+    email?: string[];
+    password?: string[];
+    role?: string[];
+  } | undefined;
+  success?: boolean | false;
+  userData?:{
+    data: any
+  };
+} | undefined;

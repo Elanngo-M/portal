@@ -1,28 +1,59 @@
 'use client'
  
 import { signup } from '@/app/actions/auth'
-import { useActionState, useState } from 'react'
+import { Button, Input, TextField, Typography } from '@mui/material';
+import Option from '@mui/joy/Option';
+import Select from '@mui/joy/Select';
+import { useActionState, useEffect, useState } from 'react'
+import styles from './signup.module.css'
+import { Logout } from '@mui/icons-material';
+import { FormState, SingupFormState } from '../lib/types';
+import { useRouter } from 'next/navigation';
  
 export default function SignupForm() {
-  const [state, action, pending] = useActionState(signup, undefined)
-  const [role , setRole] = useState<"teacher" | "student">("teacher");
+  const router = useRouter();
+  const [state, action, pending] = useActionState<SingupFormState , FormData>(signup, undefined);
+  const [role , setRole] = useState<"teacher" | "student">("student");
+  const [subject , setSubject] =  useState("");
+
+  useEffect(()=>{
+    if(state?.success){
+      router.push("/dashboard");
+      const data = JSON.stringify(state?.userData?.data)
+      localStorage.setItem("UserData",data);
+    }
+  },[state , router])
+
+  function handleRoleChange(event:any , newRole:any){
+    if(newRole == "teacher"){
+      setRole("teacher");
+    }else{
+      setRole("student");
+    }
+  }
+
+  function handleSubjectChange(event:any , newSub:any){
+    setSubject(newSub);
+  }
   return (
-    <form action={action}>
-      <div>
-        <label htmlFor="name">Name</label>
-        <input id="name" name="name" placeholder="Name" />
+    <div className={styles.container}>
+    <form action={action} className={styles.container}>
+      <Typography variant='h5' textAlign={'center'}>Signup Form</Typography>
+      <div className={styles.inputDiv}>
+        <label htmlFor="name">Name:</label>
+        <TextField id='name' name='name' placeholder='Name' variant='outlined' />
       </div>
       {state?.errors?.name && <p>{state.errors.name}</p>}
  
-      <div>
-        <label htmlFor="email">Email</label>
-        <input id="email" name="email" placeholder="Email" />
+      <div className={styles.inputDiv}>
+        <label htmlFor="email">Email:</label>
+        <TextField id="email" name="email" placeholder="email@gmail.com" variant='outlined' />
       </div>
       {state?.errors?.email && <p>{state.errors.email}</p>}
  
-      <div>
-        <label htmlFor="password">Password</label>
-        <input id="password" name="password" type="password" />
+      <div className={styles.inputDiv}>
+        <label htmlFor="password">Password:</label>
+        <TextField id="password" name="password" type="password" variant='outlined' />
       </div>
       {state?.errors?.password && (
         <div>
@@ -34,30 +65,37 @@ export default function SignupForm() {
           </ul>
         </div>
       )}
-    <div>
+    <div className={styles.inputDiv}>
       <label htmlFor="role">Role</label>
-      <select onChange={e => setRole(e.target.value as "teacher" | "student")} value={role} id="role" name="role">
-        <option value="teacher">Teacher</option>
-        <option value="student">Student</option>
-      </select>
+      <Select onChange={handleRoleChange} value={role} id="role" name="role"
+        disabled={false}
+        variant="outlined"
+      >
+        <Option value={"teacher"}>Teacher</Option>
+        <Option value={"student"}>Student</Option>
+      </Select>
     </div>
 
      {role == "teacher" ? (
-        <div>
-            <label htmlFor="subject">Subject</label>
-            <select id="subject" name="subject">
-                <option value="maths">Maths</option>
-                <option value="science">Sceince</option>
-                <option value="social">Social</option>
-                <option value="english">English</option>
-                <option value="tamil">Tamil</option>
-            </select>
-        </div>
+            <div className={styles.inputDiv}>
+      <label htmlFor="role">Subject</label>
+      <Select onChange={handleSubjectChange} value={subject} id="subject" name="subject"
+        disabled={false}
+        variant="outlined"
+      >
+        <Option value={"Science"}>Science</Option>
+        <Option value={"Social"}>Social</Option>
+        <Option value={"Maths"}>Maths</Option>
+        <Option value={"English"}>English</Option>
+        <Option value={"Tamil"}>Tamil</Option>
+      </Select>
+    </div>
      ) : null}
 
-      <button disabled={pending} type="submit">
+      <Button startIcon={<Logout/>}  variant='contained' disabled={pending} type="submit">
         Sign Up
-      </button>
+      </Button>
     </form>
+    </div>
   )
 }
