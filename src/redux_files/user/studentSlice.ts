@@ -1,15 +1,16 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface StudentState {
-  role: string;
-  email: string | null;
-  name: string | null;
-}
 
+interface AssignmentType {
+  name:string | null;
+}
+interface StudentState {
+  data: { role: string; email: string | null; name: string | null };
+  assignments: AssignmentType[];
+}
 const initialState: StudentState = {
-  role: "",
-  email: null,
-  name: null,
+  data: { role: "", email: null, name: null },
+  assignments: []
 };
 
 const StudentSlice = createSlice({
@@ -18,16 +19,17 @@ const StudentSlice = createSlice({
   reducers: {
     setStudent: (
       state,
-      action: PayloadAction<{ role: string; email: string , name:string  }>
+      action: PayloadAction<{ data:{role: string; email: string; name: string}, assignments:AssignmentType[] }>
     ) => {
-      state.role = action.payload.role ?? "";
-      state.email = action.payload.email ?? "";
-      state.name = action.payload.name ?? "";
+      state.data.role = action.payload.data.role ?? "";
+      state.data.email = action.payload.data.email ?? "";
+      state.data.name = action.payload.data.name ?? "";
+      state.assignments = action.payload.assignments?? [];
     },
     clearStudent: (state) => {
-      state.role = "";
-      state.email = null;
-      state.name = null;
+      state.data.role = "";
+      state.data.email = null;
+      state.data.name = null;
     },
   },
 });

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface TeacherState {
-  role: string;
+  role: string | null;
   email: string | null;
   name: string | null;
   subject: string | null;
@@ -22,13 +22,13 @@ const TeacherSlice = createSlice({
       state,
       action: PayloadAction<{ role: string; email: string , name:string , subject:string }>
     ) => {
-      state.role = action.payload.role ?? "";
-      state.email = action.payload.email ?? "";
-      state.name = action.payload.name ?? "";
-      state.subject = action.payload.subject ?? "";
+      state.role = action.payload?.role ?? "";
+      state.email = action.payload?.email ?? "";
+      state.name = action.payload?.name ?? "";
+      state.subject = action.payload?.subject ?? "";
     },
     clearTeacher: (state) => {
-      state.role = "";
+      state.role = null;
       state.email = null;
       state.name = null;
       state.subject = null;

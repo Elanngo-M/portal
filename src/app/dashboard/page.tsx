@@ -10,8 +10,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     const userData = getUserLocalData();
-    if (userData) {
-      setUser(userData);
+    if(userData.teacherData){
+        setUser(userData.teacherData)
+    }else if (userData.data) {
+      setUser(userData.data);
     }
   }, []);
 

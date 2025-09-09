@@ -26,7 +26,12 @@ export default function LoginForm({
   useEffect(() => {
     if (state?.success) {
       router.push("/dashboard");
-      const data = JSON.stringify(state?.userData?.data)
+      let data = null
+      if(user_role == "teacher"){
+         data = JSON.stringify(state?.userData?.data);
+      }else{
+        data = JSON.stringify(state?.userData);
+      }
       localStorage.setItem("UserData",data);
     }
   }, [router, state])

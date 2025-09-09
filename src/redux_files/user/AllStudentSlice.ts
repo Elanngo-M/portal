@@ -25,7 +25,7 @@ const AllStudentSlice = createSlice({
       state,
       action: PayloadAction<AllStudentState>
     ) => {
-        state.students = action.payload.students;
+        state.students = action.payload?.students;
     },
     clearStudents: (state) => {
       state.students = [];

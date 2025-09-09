@@ -15,7 +15,7 @@ export function setStudentReduxData(dispatch: any) {
 
 export function setTeacherReduxData(dispatch: any) {
   let data = getUserLocalData();
-  dispatch(setTeacher(data.teacherData.data));
+  dispatch(setTeacher(data.teacherData?.data));
 }
 
 export function setAllStudentReduxData(dispatch: any) {
