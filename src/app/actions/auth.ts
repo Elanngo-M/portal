@@ -66,9 +66,10 @@ export async function signup(state: FormState, formData: FormData) {
     let data = { email, data: userData };
     await filewriter(data, role, true);
     await createSession(email, role);
+    const data1 = await getUserData(email , role , true);
     return {
       success: true,
-      userData: { email, data: userData }
+      userData: data1
     };
   } else {
     return {
@@ -115,6 +116,8 @@ export async function Login(state: FormState, formData: FormData) {
 
 export async function Logout1(state: FormState, formData: FormData) {
   const cookieStore = cookies();
-  (await cookieStore).delete('session');
+  if((await cookieStore).get('session')){
+    (await cookieStore).delete('session');
+  }
   return { success: true };
 }

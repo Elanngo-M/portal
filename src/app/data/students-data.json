@@ -1,1 +1,56 @@
-[{"email":"myemail@gmail.com","data":{"name":"Elanngo Madheswaran","role":"student","email":"myemail@gmail.com"}},{"email":"elanngo@gmail.com","data":{"name":"Elanngo","email":"elanngo@gmail.com","password":"elanngo@gmail1","role":"student"}},{"email":"elanngo12@gmail.com","data":{"name":"Elanngo","email":"elanngo12@gmail.com","password":"elanngo@123","role":"student"}}]
+[
+  {
+    "email": "myemail@gmail.com",
+    "data": {
+      "name": "Elanngo Madheswaran",
+      "role": "student",
+      "email": "myemail@gmail.com"
+    },
+    "assignments": [
+      {
+        "name": "Assignment 1"
+      },
+      {
+        "name": "Assignment 2"
+      }
+    ]
+  },
+  {
+    "email": "elanngo@gmail.com",
+    "data": {
+      "name": "Elanngo",
+      "email": "elanngo@gmail.com",
+      "password": "elanngo@gmail1",
+      "role": "student"
+    },
+    "assignments": [
+      {
+        "name": "Assignment 1"
+      },
+      {
+        "name": "English Ass"
+      },
+      {
+        "name": "Assignment 2"
+      }
+    ]
+  },
+  {
+    "email": "elanngo12@gmail.com",
+    "data": {
+      "name": "Elanngo",
+      "email": "elanngo12@gmail.com",
+      "password": "elanngo@123",
+      "role": "student"
+    }
+  },
+  {
+    "email": "idris@gmail.com",
+    "data": {
+      "name": "Idris",
+      "email": "idris@gmail.com",
+      "password": "idris@1234567",
+      "role": "student"
+    }
+  }
+]

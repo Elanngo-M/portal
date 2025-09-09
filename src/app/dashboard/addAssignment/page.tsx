@@ -1,0 +1,177 @@
+"use client";
+
+import { Logout1 } from "@/app/actions/auth";
+import { RootState } from "@/redux_files/state/store";
+import {
+  CheckBoxOutlineBlank,
+  CheckBoxOutlineBlankOutlined,
+  CheckBoxOutlined,
+  Logout,
+} from "@mui/icons-material";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getUserLocalData,
+  setAllStudentReduxData,
+  setTeacherReduxData,
+} from "@/app/lib/utils";
+import * as React from "react";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import Menu from "@mui/material/Menu";
+import MenuIcon from "@mui/icons-material/Menu";
+import Container from "@mui/material/Container";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
+import MenuItem from "@mui/material/MenuItem";
+import AdbIcon from "@mui/icons-material/Adb";
+import { AddAssingmenttoStudent } from "@/app/actions/assignment";
+import {
+  Autocomplete,
+  Checkbox,
+  Chip,
+  Divider,
+  FormControlLabel,
+  Paper,
+  TextField,
+} from "@mui/material";
+
+export default function AddAssignment() {
+  const Allstudent = useSelector(
+    (selector: RootState) => selector.AllStudentData
+  );
+
+  const teacher = useSelector((selector: RootState) => selector.TeacherData);
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  const [state, action, pending] = useActionState(Logout1, undefined);
+  const [astate, aaction, a_pending] = useActionState(
+    AddAssingmenttoStudent,
+    undefined
+  );
+  useEffect(() => {
+    if (state?.success) {
+      localStorage.removeItem("UserData");
+      router.push("/login");
+    }
+  }, [state, router]);
+  useEffect(() => {
+    setTeacherReduxData(dispatch);
+    setAllStudentReduxData(dispatch);
+  }, []);
+
+  const pages = [
+    `Email: ${teacher.email}`,
+    `Name: ${teacher.name}`,
+    `Subject: ${teacher.subject}`,
+  ];
+
+  function ResponsiveAppBar() {
+    return (
+      <AppBar position="static">
+        <Container maxWidth="xl">
+          <Toolbar disableGutters>
+            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+              {pages.map((page) => (
+                <Button
+                  key={page}
+                  sx={{ my: 2, color: "white", display: "block" }}
+                >
+                  {page}
+                </Button>
+              ))}
+            </Box>
+            <Box sx={{ flexGrow: 0 }}>
+              <form action={action}>
+                <Button
+                  startIcon={<Logout />}
+                  sx={{ my: 2, color: "white" }}
+                  type="submit"
+                  disabled={pending}
+                >
+                  Logout
+                </Button>
+              </form>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+    );
+  }
+
+  const [selectedStudents, setSelectedStudents] = React.useState<any[]>([]);
+
+  const handleSubmit = (formData: FormData) => {
+    formData.set("students", JSON.stringify(selectedStudents));
+    return aaction(formData);
+  };
+
+  useEffect(() => {
+    if (astate?.success) {
+      router.push("/dashboard");
+    }
+  }, [router, astate])
+  return (
+    <div>
+      <ResponsiveAppBar />
+      <form action={handleSubmit} style={{ marginTop: 24, maxWidth: 500 }}>
+        <TextField
+          name="name"
+          label="Assignment Name"
+          fullWidth
+          margin="normal"
+          required
+        />
+        <Autocomplete
+          multiple
+          id="students-checkboxes"
+          options={(Allstudent.students || []).map((student: any) => ({
+            id: student.email,
+            name: student.data?.name || student.email,
+            email: student.email,
+            role: student.data?.role,
+          }))}
+          value={selectedStudents}
+          onChange={(_, newValue) => setSelectedStudents(newValue)}
+          getOptionLabel={(option) => `${option.name} (${option.email})`}
+          renderOption={(props, option, { selected }) => {
+            const { key, ...otherProps } = props;
+            return (
+              <li key={option.email} {...otherProps}>
+                <Checkbox
+                  icon={<CheckBoxOutlineBlankOutlined fontSize="small" />}
+                  checkedIcon={<CheckBoxOutlineBlank fontSize="small" />}
+                  style={{ marginRight: 8 }}
+                  checked={selected}
+                />
+                {option.name}:{option.email}
+              </li>
+            );
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Select Students"
+              placeholder="Students"
+            />
+          )}
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={a_pending || selectedStudents.length === 0}
+          sx={{ mt: 2 }}
+        >
+          Add Assignment
+        </Button>
+      </form>
+    </div>
+  );
+}

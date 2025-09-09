@@ -1,1 +1,26 @@
-[{"name":"Elanngo Madheswaran","email":"myemail@gmail.com","password":"myemail@1","role":"student"},{"name":"Elanngo","email":"elanngo@gmail.com","password":"elanngo@gmail1","role":"student"},{"name":"Elanngo","email":"elanngo12@gmail.com","password":"elanngo@123","role":"student"}]
+[
+  {
+    "name": "Elanngo Madheswaran",
+    "email": "myemail@gmail.com",
+    "password": "myemail@1",
+    "role": "student"
+  },
+  {
+    "name": "Elanngo",
+    "email": "elanngo@gmail.com",
+    "password": "elanngo@gmail1",
+    "role": "student"
+  },
+  {
+    "name": "Elanngo",
+    "email": "elanngo12@gmail.com",
+    "password": "elanngo@123",
+    "role": "student"
+  },
+  {
+    "name": "Idris",
+    "email": "idris@gmail.com",
+    "password": "idris@1234567",
+    "role": "student"
+  }
+]

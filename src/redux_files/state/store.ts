@@ -1,8 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userDataReducer from "@/redux_files/user/userDataSlice";
+import StudentReducer from "@/redux_files/user/studentSlice";
+import TeacherReducer from "@/redux_files/user/TeacherSlice";
+import AllStudentReducer from "@/redux_files/user/AllStudentSlice";
 export const store = configureStore({
   reducer: {
-    userData: userDataReducer,
+    StudentData: StudentReducer,
+    TeacherData: TeacherReducer,
+    AllStudentData: AllStudentReducer,
   },
 });
 
