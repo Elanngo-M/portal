@@ -1,6 +1,6 @@
 "use server"
 import { SignupFormSchema, FormState, LoginFormSchema } from '@/app/lib/types'
-import { filewriter, getUserData, userRegisterd } from '../lib/filecompo'
+import { filereader, filewriter, getUserData, userRegisterd } from '../lib/filecompo'
 import { error } from 'console'
 import { redirect } from 'next/navigation'
 import { createSession } from '../lib/session'
@@ -62,9 +62,18 @@ export async function signup(state: FormState, formData: FormData) {
   const isOld = await userRegisterd(email, role);
 
   if (!isOld) {
-    await filewriter(userData, role);
+    let olddata = await filereader(role);
+    olddata = [...olddata , userData];
+    await filewriter(olddata, role);
+    olddata = await filereader(role,true);
     let data = { email, data: userData };
-    await filewriter(data, role, true);
+    if(role == "student"){
+      olddata = [...olddata , data];
+    }else{
+      olddata = olddata.teacherData;
+      olddata = [...olddata , data];
+    }
+    await filewriter(olddata, role, true);
     await createSession(email, role);
     const data1 = await getUserData(email , role , true);
     return {

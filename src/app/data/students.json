@@ -22,5 +22,11 @@
     "email": "idris@gmail.com",
     "password": "idris@1234567",
     "role": "student"
+  },
+  {
+    "name": "Leo",
+    "email": "leo@gmail.com",
+    "password": "leo@12345",
+    "role": "student"
   }
 ]

@@ -1,16 +1,18 @@
+import { assignment, assignmentSubmit } from "@/app/lib/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-
-interface AssignmentType {
-  name:string | null;
-}
 interface StudentState {
-  data: { role: string; email: string | null; name: string | null };
-  assignments: AssignmentType[];
+  data: {
+    role: string;
+    email: string | null;
+    name: string | null;
+  };
+  assignments: assignment[];
 }
+
 const initialState: StudentState = {
   data: { role: "", email: null, name: null },
-  assignments: []
+  assignments: [],
 };
 
 const StudentSlice = createSlice({
@@ -19,20 +21,51 @@ const StudentSlice = createSlice({
   reducers: {
     setStudent: (
       state,
-      action: PayloadAction<{ data:{role: string; email: string; name: string}, assignments:AssignmentType[] }>
+      action: PayloadAction<{
+        studentData: {
+          email: string;
+          data: { role: string; email: string; name: string };
+        };
+        assignmentData: assignment[];
+      }>
     ) => {
-      state.data.role = action.payload.data.role ?? "";
-      state.data.email = action.payload.data.email ?? "";
-      state.data.name = action.payload.data.name ?? "";
-      state.assignments = action.payload.assignments?? [];
+      const { studentData, assignmentData } = action.payload;
+      state.data.role = studentData.data.role ?? "";
+      state.data.email = studentData.data.email ?? "";
+      state.data.name = studentData.data.name ?? "";
+      state.assignments = assignmentData ?? [];
     },
+
     clearStudent: (state) => {
-      state.data.role = "";
-      state.data.email = null;
-      state.data.name = null;
+      state.data = { role: "", email: null, name: null };
+      state.assignments = [];
+    },
+
+    submitAssignment: (state, action: PayloadAction<assignmentSubmit>) => {
+      const { name, studentName, answer } = action.payload;
+
+      const assignmentIndex = state.assignments.findIndex(
+        (a) => a.name === name
+      );
+
+      if (assignmentIndex !== -1) {
+        const assignment = state.assignments[assignmentIndex];
+
+        // Prevent duplicate submissions
+        const alreadySubmitted = assignment.submitted?.some(
+          (s) => s.student === studentName
+        );
+
+        if (!alreadySubmitted) {
+          assignment.submitted = [
+            ...(assignment.submitted || []),
+            { student: studentName, answer , grade:null},
+          ];
+        }
+      }
     },
   },
 });
 
-export const { setStudent, clearStudent } = StudentSlice.actions;
+export const { setStudent, clearStudent, submitAssignment } = StudentSlice.actions;
 export default StudentSlice.reducer;

@@ -1,109 +1,124 @@
-import "server-only"
+import "server-only";
 import fs from "fs";
 import path from "path";
+import { assignment } from "./types";
 
-export async function filereader(role:any , datafile= false ) {
-    let mfile = null;
-    let sfile = path.join(process.cwd() + "/src/app/data/" + "students-data.json");
-    if(datafile){
-        if(role== "student"){
-            mfile = path.join(process.cwd() + "/src/app/data/" + "students-data.json");
-        }else{
-            mfile = path.join(process.cwd() + "/src/app/data/" + "teachers-data.json");
-        }
-    }else if(role == "student" && !datafile){
-        mfile = path.join(process.cwd() + "/src/app/data/","students.json");
-    }else{
-        mfile = path.join(process.cwd() + "/src/app/data/","teachers.json");
-    }
-    if(!datafile || role == "student"){
-        if (!fs.existsSync(mfile)) return [];
-        try{
-            const file:any = fs.readFileSync(mfile);
-            const data = JSON.parse(file);
-            return data;
-        }catch(error){
-            console.log("Error reading file ",error);
-        }
-    }else{
-        if(!fs.existsSync(mfile) ||!fs.existsSync(sfile)) return [];
-        try{
-            const file1:any = fs.readFileSync(mfile);
-            const file2:any = fs.readFileSync(sfile);
-            const data1 = JSON.parse(file1);
-            const data2 = JSON.parse(file2);
-            const data = {teacherData: data1 , studentData:data2}
-            return data;
-        }catch(error){
-            console.log("Error reading file ",error);
-        }
-    }
-    return [];
-}
+const basePath = path.join(process.cwd(), "src/app/data");
 
-export async function getUserData(email: string, role: string , datafile=false) {
-    const users = await filereader(role , datafile);
-    if(datafile && role == "teacher"){
-        let teacher = users.teacherData.find((user: any) => user.email === email) || null;
-        let students = users.studentData;
-        let res = {data: {teacherData: teacher , studentData:{students:students}}};
-        return res;
-    }
-    return users.find((user: any) => user.email === email) || null;
-}
+export async function filereader(role: string, datafile = false) {
+  const studentDataFile = path.join(basePath, "students-data.json");
+  let mainFile: string;
 
-export async function filewriter(data: any, role: any, datafile = false) {
-    let mydata = await filereader(role, datafile);
-    let newData;
+  if (datafile) {
+    switch (role) {
+      case "student":
+        mainFile = studentDataFile;
+        break;
+      case "teacher":
+        mainFile = path.join(basePath, "teachers-data.json");
+        break;
+      case "assignment":
+        mainFile = path.join(basePath, "assignments.json");
+        break;
+      default:
+        return [];
+    }
+  } else {
+    mainFile = path.join(basePath, role === "student" ? "students.json" : "teachers.json");
+  }
+
+  if (!fs.existsSync(mainFile)) return [];
+
+  try {
+    const fileContent = fs.readFileSync(mainFile, "utf-8");
+    const parsedData = JSON.parse(fileContent);
+
     if (datafile && role === "teacher") {
-        let dat = mydata.teacherData || [];
-        newData = JSON.stringify([...dat, data]);
-    } else {
-        let dat = Array.isArray(mydata) ? mydata : [];
-        newData = JSON.stringify([...dat, data]);
+      if (!fs.existsSync(studentDataFile)) return [];
+      const studentContent = fs.readFileSync(studentDataFile, "utf-8");
+      return {
+        teacherData: parsedData,
+        studentData: JSON.parse(studentContent),
+      };
     }
-    let mfile = null;
-    if (datafile) {
-        if (role == "student") {
-            mfile = path.join(process.cwd() + "/src/app/data/", "students-data.json");
-        } else {
-            mfile = path.join(process.cwd() + "/src/app/data/", "teachers-data.json");
-        }
-    }
-    else if (role == "student") {
-        mfile = path.join(process.cwd() + "/src/app/data/", "students.json");
-    } else {
-        mfile = path.join(process.cwd() + "/src/app/data/", "teachers.json");
-    }
-    fs.writeFileSync(mfile, newData);
+
+    return parsedData;
+  } catch (error) {
+    console.error(`Error reading ${role} file:`, error);
+    return [];
+  }
 }
 
-export async function userRegisterd(email:any , role:any){
-    let users = await filereader(role);
-    if (users.some((u: any) => u.email === email)){
-        return true;
-    }else{
-        return false;
-    }
+export async function getUserData(email: string, role: string, datafile = false) {
+  const users = await filereader(role, datafile);
+  console.log(users)
+  const assignments = await filereader("assignment", true);
+
+  if (datafile && role === "teacher") {
+    const teacher = users.teacherData.find((u: any) => u.email === email) || null;
+    const students = users.studentData;
+    const assignmentData = assignments.filter((a: any) => a.teacher === email);
+
+    return {
+      data: {
+        teacherData: teacher,
+        studentData: { students },
+        assignmentData,
+      },
+    };
+  }
+
+  if (datafile && role === "student") {
+    const student = users.find((u: any) => u.email === email) || null;
+   const assignmentData = assignments.filter((a: any) =>
+        a.assignedStudents.includes(email)
+    );
+
+
+    return {
+      data: {
+        studentData: student,
+        assignmentData,
+      },
+    };
+  }
+
+  return users.find((u: any) => u.email === email) || null;
 }
 
-export async function writeAssignment(assignment: any) {
-    const assignedStudents: string[] = assignment.student;
-    let studentData = await filereader("student", true);
+export async function filewriter(data: any, role: string, datafile = false) {
+  const fileName = datafile
+    ? role === "student"
+      ? "students-data.json"
+      : role === "teacher"
+      ? "teachers-data.json"
+      : "assignments.json"
+    : role === "student"
+    ? "students.json"
+    : "teachers.json";
 
-    // Add assignment info to each assigned student
-    const updatedStudentData = studentData.map((student: any) => {
-        if (assignedStudents.includes(student.email)) {
-            if (!Array.isArray(student.assignments)) {
-                student.assignments = [];
-            }
-            student.assignments.push({
-                name: assignment.name,
-            });
-        }
-        return student;
-    });
-    const mfile = path.join(process.cwd(), "src/app/data/", "students-data.json");
-    fs.writeFileSync(mfile, JSON.stringify(updatedStudentData, null, 2));
+  const filePath = path.join(basePath, fileName);
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 }
 
+
+export async function userRegisterd(email: string, role: string) {
+  const users = await filereader(role);
+  return users.some((u: any) => u.email === email);
+}
+
+export async function writeAssignment(assignment: assignment) {
+  const assignments = await filereader("assignment", true);
+  assignments.push({
+    name: assignment.name,
+    subject: assignment.subject,
+    teacher: assignment.teacher,
+    dueDate: assignment.dueDate,
+    assignedStudents: assignment.student,
+    minCount : assignment.minCount,
+    submitted: assignment.submitted,
+  });
+
+  const filePath = path.join(basePath, "assignments.json");
+  fs.writeFileSync(filePath, JSON.stringify(assignments, null, 2));
+}

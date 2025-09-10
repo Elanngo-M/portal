@@ -63,3 +63,26 @@ export type SingupFormState = | {
     data: any
   };
 } | undefined;
+
+export type assignment = {
+    name: any ,
+    student: any[],
+    subject: any,
+    teacher: any,
+    dueDate: any,
+    minCount: any,
+    submitted: {
+      student: string,
+      answer: string,
+      grade: any
+    }[] | [],
+};
+
+export type assignmentSubmit = {
+  name: any,
+  studentName : any,
+  subject: any,
+  teacher: any,
+  date : any,
+  answer : any
+}

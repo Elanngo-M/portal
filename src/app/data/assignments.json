@@ -1,0 +1,45 @@
+[
+  {
+    "name": "Assignment 8",
+    "subject": "maths",
+    "teacher": "myemail@gmail.com",
+    "dueDate": "2025-09-27",
+    "assignedStudents": [
+      "myemail@gmail.com",
+      "idris@gmail.com"
+    ],
+    "minCount": "200",
+    "submitted": [
+      {
+        "student": "myemail@gmail.com",
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tincidunt aliquam est, in viverra massa. Pellentesque blandit arcu purus, non mattis est iaculis eu. Nullam non dolor quis orci pretium ornare. Quisque finibus erat augue, a cursus nulla vehicula non. Morbi fringilla massa convallis, interdum tortor et, euismod augue. Aliquam non magna non ligula volutpat placerat nec vel arcu. Ut porta mattis nisl, at faucibus metus tempus non. Pellentesque non facilisis justo.\r\n\r\nOrci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Duis fringilla mauris vel sapien malesuada mattis. Pellentesque eu justo non metus lobortis blandit. Sed eleifend arcu eu massa ultrices mollis. Vestibulum bibendum, quam sed tristique viverra, diam massa gravida metus, a mollis tortor nisi vitae lorem. Cras nec tempus justo. Phasellus eu suscipit justo. Cras finibus felis sit amet odio fringilla commodo. Etiam feugiat eu felis a euismod. Integer nec mauris risus. Cras nec molestie augue. Duis nec tempus tortor.\r\n\r\nSed vitae eros leo. Mauris eu lorem auctor, placerat nisi vel, efficitur libero. Phasellus eu neque non orci egestas sodales. Duis venenatis ligula non arcu tincidunt faucibus. Suspendisse tempor imperdiet posuere. Sed viverra lacus in nulla ultricies accumsan. Nunc ante nisi, ultricies sit amet diam.",
+        "grade": 3
+      },
+      {
+        "student": "idris@gmail.com",
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut non sagittis quam. Integer mattis eros in felis aliquet, a rhoncus purus elementum. Sed vitae tellus pulvinar, tincidunt orci sed, cursus leo. Ut sed elit sit amet odio pharetra imperdiet sed quis justo. Integer efficitur suscipit ante, dapibus suscipit sapien. Mauris ultricies quis metus vitae venenatis. Quisque finibus libero a ipsum iaculis, ac efficitur ipsum luctus. Aliquam purus justo, auctor ac risus nec, dictum tristique sem. Cras fermentum, sapien non efficitur aliquet, lacus augue placerat purus, condimentum volutpat urna justo eu tortor.\r\n\r\nNunc sagittis lorem non felis convallis faucibus. Nunc pulvinar ultrices velit, at faucibus erat pretium sed. Sed id semper urna. Aliquam lacinia luctus diam, at semper ligula tempus id. Vivamus consequat consequat mauris sit amet finibus. Aliquam aliquet nunc a ligula pharetra aliquam. Duis pharetra rhoncus ante, at volutpat sapien hendrerit a.\r\n\r\nCras placerat condimentum orci, eget feugiat nibh vestibulum quis. Vivamus in neque aliquet, egestas orci in, consectetur enim. Integer interdum risus nisl, eu elementum ex pellentesque et. Ut commodo et odio quis pharetra. Nunc iaculis tincidunt nibh, ac consectetur nisl aliquet pulvinar. In dignissim massa ligula, vitae finibus tellus suscipit sit amet. Praesent sagittis eros id efficitur.",
+        "grade": 2
+      }
+    ]
+  },
+  {
+    "name": "Assignment 10",
+    "subject": "maths",
+    "teacher": "myemail@gmail.com",
+    "dueDate": "2025-09-17",
+    "assignedStudents": [
+      "myemail@gmail.com",
+      "elanngo@gmail.com",
+      "elanngo12@gmail.com",
+      "idris@gmail.com"
+    ],
+    "minCount": "100",
+    "submitted": [
+      {
+        "student": "idris@gmail.com",
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed a mauris blandit, vestibulum sapien eu, aliquam diam. Sed suscipit porttitor est vitae sollicitudin. Duis viverra velit ac erat mollis, ut consectetur turpis malesuada. Quisque bibendum vel neque vitae consectetur. Nunc rhoncus tempus urna vel placerat. Etiam vitae vestibulum velit, eu semper mi. Morbi nisi arcu, porttitor a lectus ac, placerat dictum tellus. Etiam rutrum lectus augue, facilisis consectetur velit sodales tempor. Praesent sit amet felis tristique, sollicitudin tortor vitae, pulvinar est. Aenean a mi et arcu mollis consectetur. Morbi non enim id nisl malesuada tincidunt. Nulla sagittis libero non enim.",
+        "grade": 3.5
+      }
+    ]
+  }
+]

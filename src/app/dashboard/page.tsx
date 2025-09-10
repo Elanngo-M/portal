@@ -13,7 +13,9 @@ export default function Dashboard() {
     if(userData.teacherData){
         setUser(userData.teacherData)
     }else if (userData.data) {
-      setUser(userData.data);
+      setUser(userData.data.studentData.data);
+    }else{
+      setUser(userData.studentData.data);
     }
   }, []);
 
@@ -21,7 +23,7 @@ export default function Dashboard() {
     return null;
   }
 
-  if (user.role === "student") {
+  if (user?.role === "student") {
     return <Studentboard />;
   } else {
     return <Teacherboard />;

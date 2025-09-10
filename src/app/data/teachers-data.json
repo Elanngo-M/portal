@@ -1,1 +1,61 @@
-[{"email":"myemail@gmail.com","data":{"name":"Admin","email":"myemail@gmail.com","role":"teacher","subject":"maths"}},{"email":"admin@gmail.com","data":{"name":"Daily Journal","email":"admin@gmail.com","password":"admin@gmail1","role":"teacher","subject":"Tamil"}},{"email":"idris@gmail.com","data":{"name":"Idris","email":"idris@gmail.com","password":"idris@1234567","role":"teacher","subject":"Social"}},{"email":"idris@123.com","data":{"name":"Idris","email":"idris@123.com","password":"idris@1234567","role":"teacher","subject":"Maths"}},{"email":"karthik@gmail.com","data":{"name":"Karthik","email":"karthik@gmail.com","password":"karthick@123","role":"teacher","subject":"English"}}]
+[
+  {
+    "email": "myemail@gmail.com",
+    "data": {
+      "name": "Admin",
+      "email": "myemail@gmail.com",
+      "role": "teacher",
+      "subject": "maths"
+    }
+  },
+  {
+    "email": "admin@gmail.com",
+    "data": {
+      "name": "Daily Journal",
+      "email": "admin@gmail.com",
+      "password": "admin@gmail1",
+      "role": "teacher",
+      "subject": "Tamil"
+    }
+  },
+  {
+    "email": "idris@gmail.com",
+    "data": {
+      "name": "Idris",
+      "email": "idris@gmail.com",
+      "password": "idris@1234567",
+      "role": "teacher",
+      "subject": "Social"
+    }
+  },
+  {
+    "email": "idris@123.com",
+    "data": {
+      "name": "Idris",
+      "email": "idris@123.com",
+      "password": "idris@1234567",
+      "role": "teacher",
+      "subject": "Maths"
+    }
+  },
+  {
+    "email": "karthik@gmail.com",
+    "data": {
+      "name": "Karthik",
+      "email": "karthik@gmail.com",
+      "password": "karthick@123",
+      "role": "teacher",
+      "subject": "English"
+    }
+  },
+  {
+    "email": "leo@gmail.com",
+    "data": {
+      "name": "Leo",
+      "email": "leo@gmail.com",
+      "password": "leo@12345",
+      "role": "teacher",
+      "subject": "Tamil"
+    }
+  }
+]

@@ -1,3 +1,4 @@
+import { assignment } from "@/app/lib/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface StudentState {
@@ -10,11 +11,13 @@ interface StudentState {
 }
 
 interface AllStudentState{
-    students : StudentState[]
+    students : StudentState[],
+    assignments: assignment[],
 }
 
 const initialState: AllStudentState = {
-  students:[]
+  students:[],
+  assignments: [],
 };
 
 const AllStudentSlice = createSlice({
@@ -30,8 +33,14 @@ const AllStudentSlice = createSlice({
     clearStudents: (state) => {
       state.students = [];
     },
+    setAssignments:(
+      state,
+      action: PayloadAction<assignment[]>
+    )=>{
+      state.assignments = action.payload;
+    }
   },
 });
 
-export const { setStudents, clearStudents } = AllStudentSlice.actions;
+export const { setStudents, clearStudents , setAssignments } = AllStudentSlice.actions;
 export default AllStudentSlice.reducer;

@@ -37,6 +37,7 @@ import {
   Chip,
   Divider,
   FormControlLabel,
+  Input,
   Paper,
   TextField,
 } from "@mui/material";
@@ -106,13 +107,23 @@ export default function AddAssignment() {
     );
   }
 
-  const [selectedStudents, setSelectedStudents] = React.useState<any[]>([]);
-
   const handleSubmit = (formData: FormData) => {
-    formData.set("students", JSON.stringify(selectedStudents));
+    formData.set("students", JSON.stringify(columns));
     return aaction(formData);
   };
 
+  const allOptions = (Allstudent.students || []).map((student: any) => student.email);
+  const [columns, setColumns] = React.useState<any[]>([]);
+  const [selectAll, setSelectAll] = React.useState<boolean>(false);
+  const today = new Date().toISOString().slice(0, 10);
+
+  const handleToggleSelectAll = () => {
+    setSelectAll((prev) => {
+      if (!prev) setColumns([...allOptions]);
+      else setColumns([]);
+      return !prev;
+    });
+  };
   useEffect(() => {
     if (astate?.success) {
       router.push("/dashboard");
@@ -121,7 +132,7 @@ export default function AddAssignment() {
   return (
     <div>
       <ResponsiveAppBar />
-      <form action={handleSubmit} style={{ marginTop: 24, maxWidth: 500 }}>
+      <form action={handleSubmit} style={{ marginTop: 24, maxWidth: 500 , display:'flex' , flexDirection:'column'}}>
         <TextField
           name="name"
           label="Assignment Name"
@@ -132,26 +143,30 @@ export default function AddAssignment() {
         <Autocomplete
           multiple
           id="students-checkboxes"
-          options={(Allstudent.students || []).map((student: any) => ({
-            id: student.email,
-            name: student.data?.name || student.email,
-            email: student.email,
-            role: student.data?.role,
-          }))}
-          value={selectedStudents}
-          onChange={(_, newValue) => setSelectedStudents(newValue)}
-          getOptionLabel={(option) => `${option.name} (${option.email})`}
+          disableCloseOnSelect
+          filterSelectedOptions
+          freeSolo={false}
+          options={allOptions}
+          value={columns}
+          onChange={(_e, value, reason) => {
+        if (reason === "clear" || reason === "removeOption")
+          setSelectAll(false);
+        if (reason === "selectOption" && value.length === allOptions.length)
+          setSelectAll(true);
+        setColumns(value);
+      }}
+          getOptionLabel={(option) => `${option}`}
           renderOption={(props, option, { selected }) => {
             const { key, ...otherProps } = props;
             return (
-              <li key={option.email} {...otherProps}>
+              <li key={option} {...otherProps}>
                 <Checkbox
                   icon={<CheckBoxOutlineBlankOutlined fontSize="small" />}
                   checkedIcon={<CheckBoxOutlineBlank fontSize="small" />}
                   style={{ marginRight: 8 }}
                   checked={selected}
                 />
-                {option.name}:{option.email}
+                {option}
               </li>
             );
           }}
@@ -162,11 +177,47 @@ export default function AddAssignment() {
               placeholder="Students"
             />
           )}
+          PaperComponent={(paperProps) => {
+        const { children, ...restPaperProps } = paperProps;
+        return (
+          <Paper {...restPaperProps}>
+            <Box
+              onMouseDown={(e) => e.preventDefault()} // prevent blur
+              pl={1.5}
+              py={0.5}
+            >
+              <FormControlLabel
+                onClick={(e) => {
+                  e.preventDefault(); // prevent blur
+                  handleToggleSelectAll();
+                }}
+                label="Select all"
+                control={
+                  <Checkbox id="select-all-checkbox" checked={selectAll} />
+                }
+              />
+            </Box>
+            <Divider />
+            {children}
+          </Paper>
+        );
+      }}
         />
+        <label>
+          Due date:
+          <Input name="dueDate" type="date"/>
+        </label>
+        <label>
+          Minimum word count:
+          <Input name="minCount" type="number"/>
+        </label>
+        <input name="subject" value={teacher.subject ?? ""} type="text" readOnly hidden />
+        <input name="assignedDate" value={today} type="text" readOnly hidden />
+        <input name="teacher" value={teacher.email ?? ""} type="text" readOnly hidden />
         <Button
           type="submit"
           variant="contained"
-          disabled={a_pending || selectedStudents.length === 0}
+          disabled={a_pending || columns.length === 0}
           sx={{ mt: 2 }}
         >
           Add Assignment

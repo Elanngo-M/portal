@@ -52,5 +52,14 @@
       "password": "idris@1234567",
       "role": "student"
     }
+  },
+  {
+    "email": "leo@gmail.com",
+    "data": {
+      "name": "Leo",
+      "email": "leo@gmail.com",
+      "password": "leo@12345",
+      "role": "student"
+    }
   }
 ]
