@@ -68,10 +68,10 @@ export async function SubmitAssignmentAnswer(state: any, formData: FormData) {
   try {
     const assignments = await filereader("assignment", true);
 
-    const assignmentIndex = assignments.findIndex((a: any) => a.name === name);
-    if (assignmentIndex === -1) {
-      return { error: "Assignment not found" };
-    }
+    const assignmentIndex = assignments.findIndex(
+  (a: any) => a.name === name && a.teacher === teacher
+);
+
 
     const assignment = assignments[assignmentIndex];
 
@@ -105,6 +105,7 @@ export async function SubmitRating(state: any, formData: FormData) {
   const assignmentName = formData.get("assignmentName");
   const studentName = formData.get("studentName");
   const grade = formData.get("rating");
+  const teacher = formData.get("teacher");
 
   if (!assignmentName || !studentName || grade === null) {
     return { error: "Missing required fields" };
@@ -113,10 +114,10 @@ export async function SubmitRating(state: any, formData: FormData) {
   try {
     const assignments = await filereader("assignment", true);
 
-    const assignmentIndex = assignments.findIndex((a: any) => a.name === assignmentName);
-    if (assignmentIndex === -1) {
-      return { error: "Assignment not found" };
-    }
+    const assignmentIndex = assignments.findIndex(
+  (a: any) => a.name === assignmentName && a.teacher === teacher
+);
+
 
     const assignment = assignments[assignmentIndex];
 

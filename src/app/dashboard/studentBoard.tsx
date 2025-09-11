@@ -1,36 +1,48 @@
-"use client";
-
-import { Logout1 } from "@/app/actions/auth";
+import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  Toolbar,
+  Typography,
+  Paper,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  TextField,
+  Rating,
+  Stack,
+  Tabs,
+  Tab,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useState, useEffect, useActionState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux_files/state/store";
-import { Logout } from "@mui/icons-material";
-import AdbIcon from "@mui/icons-material/Adb";
-import { Button, Rating, TextField } from "@mui/material";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Toolbar from "@mui/material/Toolbar";
-import { useRouter } from "next/navigation";
-import { useActionState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setStudentReduxData, submitAsstoRedux } from "../lib/utils";
-import { submitAssignment } from "@/redux_files/user/studentSlice";
-import { assignment, assignmentSubmit } from "../lib/types";
 import { SubmitAssignmentAnswer } from "../actions/assignment";
-import { useState } from "react";
+import { assignment, assignmentSubmit } from "../lib/types";
+import { setStudentReduxData, submitAsstoRedux } from "../lib/utils";
+import { Logout1 } from "../actions/auth";
+import { useRouter } from "next/navigation";
+import { Logout } from "@mui/icons-material";
+import AssignmentTabs from "../lib/components/assignmentTabs";
 
 export default function Studentboard() {
-
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
-
-  const student = useSelector((selector: RootState) => selector.StudentData);
-  const router = useRouter();
+  const [tabIndex, setTabIndex] = useState(0);
+  const student = useSelector((state: RootState) => state.StudentData);
   const dispatch = useDispatch();
+  const router = useRouter();
+   const [state, action, pending] = useActionState(Logout1, undefined);
 
-  useEffect(()=>{
+  useEffect(() => {
     setStudentReduxData(dispatch);
-  },[])
-
-  const [state, action, pending] = useActionState(Logout1, undefined);
+  }, []);
+  
 
   useEffect(() => {
     if (state?.success) {
@@ -39,65 +51,77 @@ export default function Studentboard() {
     }
   }, [state, router]);
 
- 
+  function submitAss(name: string, subject: string, teacher: string, minCount: number) {
+    const answer = answers[name] || "";
+    const wordCount = answer.trim().split(/\s+/).length;
 
-function submitAss(assignmentName: string, assignmentSubject: string, assignmentTeacher: string, minCount: number) {
-  const answerText = answers[assignmentName] || "";
-  const wordCount = answerText.trim().split(/\s+/).length;
+    if (wordCount < minCount) {
+      alert(`Minimum ${minCount} words required. You wrote ${wordCount}.`);
+      return;
+    }
 
-  if (wordCount < minCount) {
-    alert(`Answer must be at least ${minCount} words. Current: ${wordCount}`);
-    return;
+    const today = new Date().toISOString().split("T")[0];
+    const payload: assignmentSubmit = {
+      name,
+      studentName: student.data.email,
+      subject,
+      teacher,
+      date: today,
+      answer,
+    };
+
+    const formData = new FormData();
+    Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+    SubmitAssignmentAnswer({}, formData).then((res) => {
+      if (res?.success) {
+        submitAsstoRedux(dispatch, payload);
+      }
+    });
   }
 
-  const today = new Date().toISOString().split("T")[0];
 
-  const myassignment: assignmentSubmit = {
-    name: assignmentName,
-    studentName: student.data.email,
-    subject: assignmentSubject,
-    teacher: assignmentTeacher,
-    date: today,
-    answer: answerText,
-  };
+const [subjectFilter, setSubjectFilter] = useState("All");
+const [dueOrder, setDueOrder] = useState("asc");
 
-  const formData = new FormData();
-  Object.entries(myassignment).forEach(([key, value]) => formData.append(key, value));
-
-  SubmitAssignmentAnswer({}, formData).then((res) => {
-    if (res?.success) {
-      submitAsstoRedux(dispatch, myassignment);
-      console.log("Assignment submitted successfully");
-    } else {
-      console.error("Submission failed:", res?.error || res?.details);
-    }
+const subjects = Array.from(new Set(student.assignments.map(a => a.subject)));
+const filteredAssignments = student.assignments
+  .filter((a) => subjectFilter === "All" || a.subject === subjectFilter)
+  .sort((a, b) => {
+    const dateA = new Date(a.dueDate).getTime();
+    const dateB = new Date(b.dueDate).getTime();
+    return dueOrder === "asc" ? dateA - dateB : dateB - dateA;
   });
-}
+
+const pendingAssignments = filteredAssignments.filter(
+  (a) => !a.submitted?.some((s) => s.student === student.data.email)
+);
+
+const gradedAssignments = filteredAssignments.filter((a) => {
+  const submission = a.submitted?.find((s) => s.student === student.data.email);
+  return submission && submission.grade != null;
+});
+
+const submittedAssignments = filteredAssignments.filter((a) => {
+  const submission = a.submitted?.find((s) => s.student === student.data.email);
+  return submission && submission.grade == null;
+});
 
 
-
-  const pages = [`Email: ${student.data.email}`, `Name: ${student.data.name}`];
-  const today = new Date().toISOString().slice(0, 10);
-  function ResponsiveAppBar() {
-    return (
+  return (
+    <div>
       <AppBar position="static">
-        <Container maxWidth="xl">
-          <Toolbar disableGutters>
-            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              {pages.map((page) => (
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Student Dashboard
+          </Typography>
+          <Box sx={{ textAlign: "right" }}>
+            <Typography variant="body2">Email: {student.data.email}</Typography>
+            <Typography variant="body2">Name: {student.data.name}</Typography>
+          </Box>
+            <form action={action} style={{marginLeft:'10px'}}>
                 <Button
-                  key={page}
-                  sx={{ my: 2, color: "white", display: "block" }}
-                >
-                  {page}
-                </Button>
-              ))}
-            </Box>
-            <Box sx={{ flexGrow: 0 }}>
-              <form action={action}>
-                <Button
-                  startIcon={<Logout />}
+                  startIcon={<Logout/>}
                   sx={{ my: 2, color: "white" }}
                   type="submit"
                   disabled={pending}
@@ -105,96 +129,53 @@ function submitAss(assignmentName: string, assignmentSubject: string, assignment
                   Logout
                 </Button>
               </form>
-            </Box>
-          </Toolbar>
-        </Container>
+        </Toolbar>
       </AppBar>
-    );
-  }
 
+      <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+  <FormControl sx={{ minWidth: 150 }}>
+    <InputLabel>Subject</InputLabel>
+    <Select
+      value={subjectFilter}
+      label="Subject"
+      onChange={(e) => setSubjectFilter(e.target.value)}
+    >
+      <MenuItem value="All">All</MenuItem>
+      {subjects.map((subj) => (
+        <MenuItem key={subj} value={subj}>{subj}</MenuItem>
+      ))}
+    </Select>
+  </FormControl>
 
-  
-function AssignmentList() {
-  return student.assignments.map((assignment: assignment) => {
-    const hasSubmitted = assignment.submitted?.some(
-      (s) => s.student === student.data.email
-    );
+  <FormControl sx={{ minWidth: 150 }}>
+    <InputLabel>Due Date</InputLabel>
+    <Select
+      value={dueOrder}
+      label="Due Date"
+      onChange={(e) => setDueOrder(e.target.value)}
+    >
+      <MenuItem value="asc">Earliest First</MenuItem>
+      <MenuItem value="desc">Latest First</MenuItem>
+    </Select>
+  </FormControl>
+</Box>
 
-    if (!hasSubmitted) {
-      return (
-        <div key={assignment.name} style={{ marginBottom: "20px" }}>
-          <p><strong>Name:</strong> {assignment.name}</p>
-          <p><strong>Subject:</strong> {assignment.subject ?? ""}</p>
-          <p><strong>Assigned By:</strong> {assignment.teacher ?? ""}</p>
-          <p><strong>MinCount:</strong> {assignment.minCount ?? ""}</p>
+      {/* Tabs */}
+      
+<Box sx={{ mt: 4 }}>
+      <AssignmentTabs
+        tabIndex={tabIndex}
+        setTabIndex={setTabIndex}
+        pendingAssignments={pendingAssignments}
+        submittedAssignments={submittedAssignments}
+        gradedAssignments={gradedAssignments}
+        studentEmail={student.data.email}
+        answers={answers}
+        setAnswers={setAnswers}
+        onSubmit={submitAss}
+      />
+    </Box>
 
-          <TextField
-            label="Your Answer"
-            multiline
-            fullWidth
-            rows={4}
-            value={answers[assignment.name] || ""}
-            onChange={(e) =>
-              setAnswers({ ...answers, [assignment.name]: e.target.value })
-            }
-            variant="outlined"
-            sx={{ marginBottom: 2 }}
-          />
-
-          <Button
-            variant="contained"
-            onClick={() =>
-              submitAss(
-                assignment.name,
-                assignment.subject,
-                assignment.teacher,
-                Number(assignment.minCount) || 0
-              )
-            }
-          >
-            Submit
-          </Button>
-        </div>
-      );
-    }
-
-    return null;
-  });
-}
-
-function GradedAssignmentList() {
-  return student.assignments.map((assignment: assignment) => {
-    const submission = assignment.submitted?.find(
-      (s) => s.student === student.data.email
-    );
-
-    const hasSubmitted = !!submission;
-    const hasGraded = submission?.grade != null;
-
-    if (hasSubmitted && hasGraded) {
-      return (
-        <div key={assignment.name} style={{ marginBottom: "20px" }}>
-          <p><strong>Name:</strong> {assignment.name}</p>
-          <p><strong>Subject:</strong> {assignment.subject ?? ""}</p>
-          <p><strong>Assigned By:</strong> {assignment.teacher ?? ""}</p>
-          <Rating name="read-only" value={submission.grade} readOnly />
-        </div>
-      );
-    }
-
-    return null;
-  });
-}
-
-
-
-  return (
-    <div>
-      <ResponsiveAppBar />
-      <h3>Assignment List</h3>
-      <AssignmentList/>
-      <h3>Graded Assignment List</h3>
-      <GradedAssignmentList/>
     </div>
   );
 }

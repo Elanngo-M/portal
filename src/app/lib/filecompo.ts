@@ -51,7 +51,6 @@ export async function filereader(role: string, datafile = false) {
 
 export async function getUserData(email: string, role: string, datafile = false) {
   const users = await filereader(role, datafile);
-  console.log(users)
   const assignments = await filereader("assignment", true);
 
   if (datafile && role === "teacher") {

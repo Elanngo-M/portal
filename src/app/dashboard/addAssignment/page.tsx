@@ -107,12 +107,35 @@ export default function AddAssignment() {
     );
   }
 
+  const [nameError, setNameError] = React.useState<string | null>(null);
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim().toLowerCase();
+    const exists = Allstudent.assignments.some(
+      (a: any) => a.name?.trim().toLowerCase() === value
+    );
+    setNameError(exists ? "Assignment name already exists" : null);
+  };
+
   const handleSubmit = (formData: FormData) => {
+    const newAssignmentName = formData.get("name")?.toString().trim();
+
+    const existingNames = (Allstudent.assignments || []).map(
+      (assignment: any) => assignment.name?.trim().toLowerCase()
+    );
+
+    if (existingNames.includes(newAssignmentName?.toLowerCase())) {
+      alert("Assignment name must be unique. This name already exists.");
+      return;
+    }
+
     formData.set("students", JSON.stringify(columns));
     return aaction(formData);
   };
 
-  const allOptions = (Allstudent.students || []).map((student: any) => student.email);
+  const allOptions = (Allstudent.students || []).map(
+    (student: any) => student.email
+  );
   const [columns, setColumns] = React.useState<any[]>([]);
   const [selectAll, setSelectAll] = React.useState<boolean>(false);
   const today = new Date().toISOString().slice(0, 10);
@@ -128,18 +151,30 @@ export default function AddAssignment() {
     if (astate?.success) {
       router.push("/dashboard");
     }
-  }, [router, astate])
+  }, [router, astate]);
   return (
     <div>
       <ResponsiveAppBar />
-      <form action={handleSubmit} style={{ marginTop: 24, maxWidth: 500 , display:'flex' , flexDirection:'column'}}>
+      <form
+        action={handleSubmit}
+        style={{
+          marginTop: 24,
+          maxWidth: 500,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <TextField
           name="name"
           label="Assignment Name"
           fullWidth
           margin="normal"
           required
+          error={!!nameError}
+          helperText={nameError}
+          onChange={handleNameChange}
         />
+
         <Autocomplete
           multiple
           id="students-checkboxes"
@@ -149,12 +184,12 @@ export default function AddAssignment() {
           options={allOptions}
           value={columns}
           onChange={(_e, value, reason) => {
-        if (reason === "clear" || reason === "removeOption")
-          setSelectAll(false);
-        if (reason === "selectOption" && value.length === allOptions.length)
-          setSelectAll(true);
-        setColumns(value);
-      }}
+            if (reason === "clear" || reason === "removeOption")
+              setSelectAll(false);
+            if (reason === "selectOption" && value.length === allOptions.length)
+              setSelectAll(true);
+            setColumns(value);
+          }}
           getOptionLabel={(option) => `${option}`}
           renderOption={(props, option, { selected }) => {
             const { key, ...otherProps } = props;
@@ -178,42 +213,54 @@ export default function AddAssignment() {
             />
           )}
           PaperComponent={(paperProps) => {
-        const { children, ...restPaperProps } = paperProps;
-        return (
-          <Paper {...restPaperProps}>
-            <Box
-              onMouseDown={(e) => e.preventDefault()} // prevent blur
-              pl={1.5}
-              py={0.5}
-            >
-              <FormControlLabel
-                onClick={(e) => {
-                  e.preventDefault(); // prevent blur
-                  handleToggleSelectAll();
-                }}
-                label="Select all"
-                control={
-                  <Checkbox id="select-all-checkbox" checked={selectAll} />
-                }
-              />
-            </Box>
-            <Divider />
-            {children}
-          </Paper>
-        );
-      }}
+            const { children, ...restPaperProps } = paperProps;
+            return (
+              <Paper {...restPaperProps}>
+                <Box
+                  onMouseDown={(e) => e.preventDefault()} // prevent blur
+                  pl={1.5}
+                  py={0.5}
+                >
+                  <FormControlLabel
+                    onClick={(e) => {
+                      e.preventDefault(); // prevent blur
+                      handleToggleSelectAll();
+                    }}
+                    label="Select all"
+                    control={
+                      <Checkbox id="select-all-checkbox" checked={selectAll} />
+                    }
+                  />
+                </Box>
+                <Divider />
+                {children}
+              </Paper>
+            );
+          }}
         />
         <label>
           Due date:
-          <Input name="dueDate" type="date"/>
+          <Input name="dueDate" type="date" />
         </label>
         <label>
           Minimum word count:
-          <Input name="minCount" type="number"/>
+          <Input name="minCount" type="number" />
         </label>
-        <input name="subject" value={teacher.subject ?? ""} type="text" readOnly hidden />
+        <input
+          name="subject"
+          value={teacher.subject ?? ""}
+          type="text"
+          readOnly
+          hidden
+        />
         <input name="assignedDate" value={today} type="text" readOnly hidden />
-        <input name="teacher" value={teacher.email ?? ""} type="text" readOnly hidden />
+        <input
+          name="teacher"
+          value={teacher.email ?? ""}
+          type="text"
+          readOnly
+          hidden
+        />
         <Button
           type="submit"
           variant="contained"

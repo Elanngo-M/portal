@@ -38,7 +38,81 @@
       {
         "student": "idris@gmail.com",
         "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed a mauris blandit, vestibulum sapien eu, aliquam diam. Sed suscipit porttitor est vitae sollicitudin. Duis viverra velit ac erat mollis, ut consectetur turpis malesuada. Quisque bibendum vel neque vitae consectetur. Nunc rhoncus tempus urna vel placerat. Etiam vitae vestibulum velit, eu semper mi. Morbi nisi arcu, porttitor a lectus ac, placerat dictum tellus. Etiam rutrum lectus augue, facilisis consectetur velit sodales tempor. Praesent sit amet felis tristique, sollicitudin tortor vitae, pulvinar est. Aenean a mi et arcu mollis consectetur. Morbi non enim id nisl malesuada tincidunt. Nulla sagittis libero non enim.",
+        "grade": 2.5
+      },
+      {
+        "student": "myemail@gmail.com",
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla lobortis ante vitae massa tincidunt dapibus. Nulla risus lacus, porttitor nec lectus ut, maximus lobortis dolor. Aenean ac dignissim felis. Nulla ornare vestibulum aliquet. Morbi fringilla vel lectus iaculis pretium. Mauris ullamcorper euismod porttitor. Maecenas gravida nisi est, vel mattis velit faucibus eget. Donec dignissim, lectus molestie volutpat egestas, nunc nibh interdum nibh, in maximus enim odio non massa. Fusce non nunc non mi mattis venenatis. Proin tempus massa id sodales interdum. Vivamus quis sollicitudin mi. Nullam sagittis sapien ac aliquet vehicula. Maecenas fringilla lacinia lacus a lobortis. Praesent gravida nisi.",
         "grade": 3.5
+      }
+    ]
+  },
+  {
+    "name": "Assignment 1",
+    "subject": "Social",
+    "teacher": "idris@gmail.com",
+    "dueDate": "2025-09-13",
+    "assignedStudents": [
+      "myemail@gmail.com",
+      "leo@gmail.com"
+    ],
+    "minCount": "50",
+    "submitted": [
+      {
+        "student": "myemail@gmail.com",
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent luctus sollicitudin tortor quis vestibulum. Suspendisse potenti. Praesent pretium fringilla orci, in fringilla ex molestie quis. Duis mi diam, aliquam et scelerisque in, consequat eu orci. Donec auctor elit at cursus blandit. Aliquam ligula arcu, laoreet in dapibus sit amet, auctor.",
+        "grade": 3.5
+      }
+    ]
+  },
+  {
+    "name": "Assignment 1",
+    "subject": "maths",
+    "teacher": "myemail@gmail.com",
+    "dueDate": "2025-09-18",
+    "assignedStudents": [
+      "myemail@gmail.com",
+      "elanngo@gmail.com"
+    ],
+    "minCount": "31",
+    "submitted": [
+      {
+        "student": "myemail@gmail.com",
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat bibendum nibh, nec egestas eros sodales venenatis. Maecenas quis elementum mi. Ut mi erat, hendrerit in consectetur ac, mollis ut leo. Aliquam sollicitudin neque sed odio tempus consequat sit amet.",
+        "grade": 3.5
+      }
+    ]
+  },
+  {
+    "name": "Assignment 2",
+    "subject": "maths",
+    "teacher": "myemail@gmail.com",
+    "dueDate": "2025-09-18",
+    "assignedStudents": [
+      "myemail@gmail.com"
+    ],
+    "minCount": "31",
+    "submitted": [
+      {
+        "student": "myemail@gmail.com",
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat bibendum nibh, nec egestas eros sodales venenatis. Maecenas quis elementum mi. Ut mi erat, hendrerit in consectetur ac, mollis ut leo. Aliquam sollicitudin neque sed odio tempus consequat sit amet.",
+        "grade": 3
+      }
+    ]
+  },
+  {
+    "name": "Assignment 2",
+    "subject": "Social",
+    "teacher": "idris@gmail.com",
+    "dueDate": "2025-09-18",
+    "assignedStudents": [
+      "myemail@gmail.com"
+    ],
+    "minCount": "31",
+    "submitted": [
+      {
+        "student": "myemail@gmail.com",
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat bibendum nibh, nec egestas eros sodales venenatis. Maecenas quis elementum mi. Ut mi erat, hendrerit in consectetur ac, mollis ut leo. Aliquam sollicitudin neque sed odio tempus consequat sit amet."
       }
     ]
   }

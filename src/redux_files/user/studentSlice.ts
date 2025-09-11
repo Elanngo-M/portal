@@ -42,10 +42,10 @@ const StudentSlice = createSlice({
     },
 
     submitAssignment: (state, action: PayloadAction<assignmentSubmit>) => {
-      const { name, studentName, answer } = action.payload;
+      const { name, studentName, answer , teacher} = action.payload;
 
       const assignmentIndex = state.assignments.findIndex(
-        (a) => a.name === name
+        (a) => a.name === name && a.teacher === teacher
       );
 
       if (assignmentIndex !== -1) {

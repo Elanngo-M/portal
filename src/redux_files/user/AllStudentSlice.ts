@@ -1,7 +1,7 @@
 import { assignment } from "@/app/lib/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface StudentState {
+export interface StudentState {
   email: string,
   data: {
     role: string;
