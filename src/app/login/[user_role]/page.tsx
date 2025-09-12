@@ -33,6 +33,7 @@ export default function LoginForm({
         data = JSON.stringify(state?.userData);
       }
       localStorage.setItem("UserData",data);
+      localStorage.setItem("loggedIn:","true");
     }
   }, [router, state])
 

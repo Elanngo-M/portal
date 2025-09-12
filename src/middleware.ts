@@ -15,6 +15,10 @@ export default async function middleware(req:NextRequest) {
     const isteacherRoute = teacherRoutes.includes(path);
     const cookie = (await cookies()).get("session")?.value;
     const session = cookie ? await decrypt(cookie) : null;
+    
+    if (req.method === "POST" && path === "/dashboard") {
+    return NextResponse.next(); 
+    }
     if((isPublicRoute || isNonExistantRoute) && session?.userId){
         return NextResponse.redirect(new URL("/dashboard",req.nextUrl));
     }

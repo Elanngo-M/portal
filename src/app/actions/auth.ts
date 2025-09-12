@@ -124,9 +124,9 @@ export async function Login(state: FormState, formData: FormData) {
 }
 
 export async function Logout1(state: FormState, formData: FormData) {
-  const cookieStore = cookies();
-  if((await cookieStore).get('session')){
-    (await cookieStore).delete('session');
+  const cookieStore = await cookies();
+  if(cookieStore.get('session')){
+    cookieStore.delete('session');
   }
   return { success: true };
 }

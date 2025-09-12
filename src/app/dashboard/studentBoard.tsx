@@ -51,12 +51,14 @@ export default function Studentboard() {
     setStudentReduxData(dispatch);
   }, []);
 
-  useEffect(() => {
-    if (state?.success) {
-      localStorage.removeItem("UserData");
-      router.push("/login");
-    }
-  }, [state, router]);
+  
+useEffect(() => {
+  if (state?.success) {
+    localStorage.removeItem("UserData");
+    router.push("/");
+  }
+}, [state, router]);
+
 
   function submitAss(
     name: string,

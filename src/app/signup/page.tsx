@@ -21,6 +21,7 @@ export default function SignupForm() {
       router.push("/dashboard");
       const data = JSON.stringify(state?.userData?.data)
       localStorage.setItem("UserData",data);
+      localStorage.setItem("loggedIn:","true");
     }
   },[state , router])
 
