@@ -3,6 +3,8 @@ import AssignmentAccordion from "./assignmentAccordian";
 import { assignment } from "../types";
 
 export default function AssignmentTabs({
+    setAlert,
+  alert,
   tabIndex,
   setTabIndex,
   pendingAssignments,

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { filereader, filewriter, writeAssignment } from "../lib/filecompo";
-import { assignment } from "../lib/types";
+import { assignment} from "../lib/types";
 
 export async function AddAssingmenttoStudent(state: any, formData: FormData) {
   const studentsString = formData.get("students");
@@ -54,12 +54,12 @@ export async function AddAssingmenttoStudent(state: any, formData: FormData) {
 }
 
 export async function SubmitAssignmentAnswer(state: any, formData: FormData) {
-  const name = formData.get("name");
-  const studentName = formData.get("studentName");
-  const subject = formData.get("subject");
-  const teacher = formData.get("teacher");
-  const date = formData.get("date");
-  const answer = formData.get("answer");
+  const name= formData.get("name");
+  const studentName= formData.get("studentName");
+  const subject= formData.get("subject");
+  const teacher= formData.get("teacher");
+  const date= formData.get("date");
+  const answer= formData.get("answer");
 
   if (!name || !studentName || !answer) {
     return { error: "Missing required fields" };
@@ -83,7 +83,7 @@ export async function SubmitAssignmentAnswer(state: any, formData: FormData) {
       return { error: "Assignment already submitted" };
     }
 
-    assignment.submitted.push({ student: studentName, answer });
+    assignment.submitted.push({ student: studentName, answer: answer });
 
     await filewriter(assignments, "assignment", true);
 

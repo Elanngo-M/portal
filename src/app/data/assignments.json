@@ -115,5 +115,38 @@
         "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat bibendum nibh, nec egestas eros sodales venenatis. Maecenas quis elementum mi. Ut mi erat, hendrerit in consectetur ac, mollis ut leo. Aliquam sollicitudin neque sed odio tempus consequat sit amet."
       }
     ]
+  },
+  {
+    "name": "Assignment 6",
+    "subject": "maths",
+    "teacher": "myemail@gmail.com",
+    "dueDate": "2025-09-23",
+    "assignedStudents": [
+      "myemail@gmail.com",
+      "elanngo@gmail.com",
+      "elanngo12@gmail.com",
+      "idris@gmail.com",
+      "leo@gmail.com"
+    ],
+    "minCount": "31",
+    "submitted": [
+      {
+        "student": "myemail@gmail.com",
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras luctus urna neque, vel auctor massa tempus id. Praesent ultrices orci urna, quis pretium nunc malesuada eget. Fusce a tellus. e a tellus.",
+        "grade": 3.5
+      }
+    ]
+  },
+  {
+    "name": "Dead poet's society ",
+    "subject": "English",
+    "teacher": "karthik@gmail.com",
+    "dueDate": "2025-09-23",
+    "assignedStudents": [
+      "myemail@gmail.com"
+    ],
+    "minCount": "30",
+    "submitted": [
+    ]
   }
 ]
