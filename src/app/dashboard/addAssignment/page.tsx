@@ -1,53 +1,36 @@
 "use client";
 
+import { AddAssingmenttoStudent } from "@/app/actions/assignment";
 import { Logout1 } from "@/app/actions/auth";
+import { setAllStudentReduxData, setTeacherReduxData } from "@/app/lib/utils";
 import { RootState } from "@/redux_files/state/store";
 import {
   CheckBoxOutlineBlank,
   CheckBoxOutlineBlankOutlined,
-  CheckBoxOutlined,
   Logout,
 } from "@mui/icons-material";
-import { useRouter } from "next/navigation";
-import { useActionState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import {
-  getUserLocalData,
-  setAllStudentReduxData,
-  setTeacherReduxData,
-} from "@/app/lib/utils";
-import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
-import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
-import MenuItem from "@mui/material/MenuItem";
-import AdbIcon from "@mui/icons-material/Adb";
-import { AddAssingmenttoStudent } from "@/app/actions/assignment";
-import {
+  AppBar,
   Autocomplete,
+  Box,
+  Button,
   Checkbox,
-  Chip,
+  Container,
   Divider,
   FormControlLabel,
   Input,
   Paper,
   TextField,
+  Toolbar,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
+import * as React from "react";
+import { useActionState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function AddAssignment() {
-  const Allstudent = useSelector(
-    (selector: RootState) => selector.AllStudentData
-  );
-
-  const teacher = useSelector((selector: RootState) => selector.TeacherData);
+  const Allstudent = useSelector((state: RootState) => state.AllStudentData);
+  const teacher = useSelector((state: RootState) => state.TeacherData);
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -56,31 +39,77 @@ export default function AddAssignment() {
     AddAssingmenttoStudent,
     undefined
   );
+
+  const [columns, setColumns] = React.useState<string[]>([]);
+  const [selectAll, setSelectAll] = React.useState<boolean>(false);
+  const [nameError, setNameError] = React.useState<string | null>(null);
+  const [dueDate, setDueDate] = React.useState<string>("");
+  const [minCount, setMinCount] = React.useState<number | null>(null);
+
+  const allOptions = (Allstudent.students || []).map((student: any) => ({
+    email: student.email,
+    name: student.data.name,
+  }));
+
+  const today = new Date().toISOString().slice(0, 10);
+
   useEffect(() => {
     if (state?.success) {
       localStorage.removeItem("UserData");
       router.push("/login");
     }
   }, [state, router]);
+
   useEffect(() => {
     setTeacherReduxData(dispatch);
     setAllStudentReduxData(dispatch);
   }, []);
 
-  const pages = [
-    `Email: ${teacher.email}`,
-    `Name: ${teacher.name}`,
-    `Subject: ${teacher.subject}`,
-  ];
+  useEffect(() => {
+    if (astate?.success) {
+      router.push("/dashboard");
+    }
+  }, [router, astate]);
 
-  function ResponsiveAppBar() {
-    return (
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim().toLowerCase();
+    const exists = Allstudent.assignments.some(
+      (a: any) => a.name?.trim().toLowerCase() === value
+    );
+    setNameError(exists ? "Assignment name already exists" : null);
+  };
+
+  const handleToggleSelectAll = () => {
+    setSelectAll((prev) => {
+      if (!prev) {
+        const allEmails = allOptions.map((s) => s.email);
+        setColumns(allEmails);
+      } else setColumns([]);
+      return !prev;
+    });
+  };
+
+  const isDueDateValid = dueDate && new Date(dueDate) > new Date();
+  const isMinCountValid = typeof minCount === "number" && minCount > 0;
+  const isFormValid =
+    !nameError && isDueDateValid && isMinCountValid && columns.length > 0;
+
+  const handleSubmit = async (formData: FormData) => {
+    formData.set("students", JSON.stringify(columns));
+    return await aaction(formData);
+  };
+
+  return (
+    <div>
       <AppBar position="static">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              {pages.map((page) => (
+              {[
+                `Email: ${teacher.email}`,
+                `Name: ${teacher.name}`,
+                `Subject: ${teacher.subject}`,
+              ].map((page) => (
                 <Button
                   key={page}
                   sx={{ my: 2, color: "white", display: "block" }}
@@ -104,57 +133,7 @@ export default function AddAssignment() {
           </Toolbar>
         </Container>
       </AppBar>
-    );
-  }
 
-  const [nameError, setNameError] = React.useState<string | null>(null);
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.trim().toLowerCase();
-    const exists = Allstudent.assignments.some(
-      (a: any) => a.name?.trim().toLowerCase() === value
-    );
-    setNameError(exists ? "Assignment name already exists" : null);
-  };
-
-  const handleSubmit = (formData: FormData) => {
-    const newAssignmentName = formData.get("name")?.toString().trim();
-
-    const existingNames = (Allstudent.assignments || []).map(
-      (assignment: any) => assignment.name?.trim().toLowerCase()
-    );
-
-    if (existingNames.includes(newAssignmentName?.toLowerCase())) {
-      alert("Assignment name must be unique. This name already exists.");
-      return;
-    }
-
-    formData.set("students", JSON.stringify(columns));
-    return aaction(formData);
-  };
-
-  const allOptions = (Allstudent.students || []).map(
-    (student: any) => student.email
-  );
-  const [columns, setColumns] = React.useState<any[]>([]);
-  const [selectAll, setSelectAll] = React.useState<boolean>(false);
-  const today = new Date().toISOString().slice(0, 10);
-
-  const handleToggleSelectAll = () => {
-    setSelectAll((prev) => {
-      if (!prev) setColumns([...allOptions]);
-      else setColumns([]);
-      return !prev;
-    });
-  };
-  useEffect(() => {
-    if (astate?.success) {
-      router.push("/dashboard");
-    }
-  }, [router, astate]);
-  return (
-    <div>
-      <ResponsiveAppBar />
       <form
         action={handleSubmit}
         style={{
@@ -180,31 +159,22 @@ export default function AddAssignment() {
           id="students-checkboxes"
           disableCloseOnSelect
           filterSelectedOptions
-          freeSolo={false}
           options={allOptions}
-          value={columns}
-          onChange={(_e, value, reason) => {
+          value={allOptions.filter((opt) => columns.includes(opt.email))}
+          onChange={(_e, selectedOptions, reason) => {
+            const selectedEmails = selectedOptions.map((opt) => opt.email);
+            setColumns(selectedEmails);
+
             if (reason === "clear" || reason === "removeOption")
               setSelectAll(false);
-            if (reason === "selectOption" && value.length === allOptions.length)
+            if (
+              reason === "selectOption" &&
+              selectedEmails.length === allOptions.length
+            )
               setSelectAll(true);
-            setColumns(value);
           }}
-          getOptionLabel={(option) => `${option}`}
-          renderOption={(props, option, { selected }) => {
-            const { key, ...otherProps } = props;
-            return (
-              <li key={option} {...otherProps}>
-                <Checkbox
-                  icon={<CheckBoxOutlineBlankOutlined fontSize="small" />}
-                  checkedIcon={<CheckBoxOutlineBlank fontSize="small" />}
-                  style={{ marginRight: 8 }}
-                  checked={selected}
-                />
-                {option}
-              </li>
-            );
-          }}
+          getOptionLabel={(option) => `${option.name} (${option.email})`}
+          isOptionEqualToValue={(option, value) => option.email === value.email}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -212,18 +182,25 @@ export default function AddAssignment() {
               placeholder="Students"
             />
           )}
+          renderOption={(props, option, { selected }) => (
+            <li {...props}>
+              <Checkbox
+                icon={<CheckBoxOutlineBlankOutlined fontSize="small" />}
+                checkedIcon={<CheckBoxOutlineBlank fontSize="small" />}
+                style={{ marginRight: 8 }}
+                checked={selected}
+              />
+              {option.name} ({option.email})
+            </li>
+          )}
           PaperComponent={(paperProps) => {
             const { children, ...restPaperProps } = paperProps;
             return (
               <Paper {...restPaperProps}>
-                <Box
-                  onMouseDown={(e) => e.preventDefault()} // prevent blur
-                  pl={1.5}
-                  py={0.5}
-                >
+                <Box onMouseDown={(e) => e.preventDefault()} pl={1.5} py={0.5}>
                   <FormControlLabel
                     onClick={(e) => {
-                      e.preventDefault(); // prevent blur
+                      e.preventDefault();
                       handleToggleSelectAll();
                     }}
                     label="Select all"
@@ -238,14 +215,29 @@ export default function AddAssignment() {
             );
           }}
         />
+
         <label>
           Due date:
-          <Input name="dueDate" type="date" />
+          <Input
+            name="dueDate"
+            type="date"
+            required
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
         </label>
+
         <label>
           Minimum word count:
-          <Input name="minCount" type="number" />
+          <Input
+            name="minCount"
+            type="number"
+            required
+            value={minCount ?? ""}
+            onChange={(e) => setMinCount(Number(e.target.value))}
+          />
         </label>
+
         <input
           name="subject"
           value={teacher.subject ?? ""}
@@ -261,10 +253,11 @@ export default function AddAssignment() {
           readOnly
           hidden
         />
+
         <Button
           type="submit"
           variant="contained"
-          disabled={a_pending || columns.length === 0}
+          disabled={a_pending || !isFormValid}
           sx={{ mt: 2 }}
         >
           Add Assignment

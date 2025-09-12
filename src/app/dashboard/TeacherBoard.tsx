@@ -58,7 +58,6 @@ export default function Teacherboard() {
     (a: any) => a.teacher === teacher.email
   );
 
-  console.log(teacherAssignments);
 
   const pendingAssignments = teacherAssignments.filter(
     (a: any) => a.submitted.length < a.assignedStudents.length
