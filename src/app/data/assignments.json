@@ -146,7 +146,35 @@
       "myemail@gmail.com"
     ],
     "minCount": "30",
+    "submitted": []
+  },
+  {
+    "name": "Assignment 3",
+    "subject": "maths",
+    "teacher": "myemail@gmail.com",
+    "dueDate": "2025-09-25",
+    "assignedStudents": [
+      "elanngo@gmail.com",
+      "myemail@gmail.com"
+    ],
+    "minCount": "030",
     "submitted": [
+      {
+        "student": "myemail@gmail.com",
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi vel leo nulla. Nam facilisis ut quam sagittis egestas. Aliquam ac ex ultrices, feugiat ipsum quis, tincidunt velit. Nam maximus elementum.",
+        "grade": 2.5
+      }
     ]
+  },
+  {
+    "name": "Assignment 4",
+    "subject": "maths",
+    "teacher": "myemail@gmail.com",
+    "dueDate": "2025-09-25",
+    "assignedStudents": [
+      "myemail@gmail.com"
+    ],
+    "minCount": "030",
+    "submitted": []
   }
 ]
