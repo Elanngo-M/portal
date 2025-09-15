@@ -6,12 +6,13 @@ import { useActionState, useEffect, useState } from 'react'
 import { use } from 'react'
 import styles from './loginform.module.css';
 
-import type { FormState } from '@/app/lib/types';
+import type { FormErrors, FormState } from '@/app/lib/types';
 import { Button, Input, Stack, TextField, Typography } from '@mui/material'
 import MailIcon from '@mui/icons-material/Mail';
 import KeyIcon from '@mui/icons-material/Key';
 import Link from 'next/link'
 import { ExitToApp } from '@mui/icons-material'
+import { isPassMatch, isUserRegistered, useDB } from '@/app/lib/utils'
 
 export default function LoginForm({
   params,
@@ -23,6 +24,8 @@ export default function LoginForm({
   const [state, action, pending] = useActionState<FormState, FormData>(Login, undefined);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState(user_role);
+  const [localErrors, setLocalErrors] = useState<FormErrors>({});
+
   useEffect(() => {
     if (state?.success) {
       router.push("/dashboard");
@@ -37,10 +40,45 @@ export default function LoginForm({
     }
   }, [router, state])
 
+   async function handleSubmit(formData: FormData) {
+      const email = formData.get("email") as string;
+      const role = formData.get("role") as "teacher" | "student";
+  
+      const alreadyRegistered = await isUserRegistered(email , role);
+  
+      if (!alreadyRegistered) {
+        // Update local error state
+        setLocalErrors({ email: ["Email not registered!!"] });
+        return;
+      }
+  
+      // Prepare user data
+      const userData: any = {
+        name: formData.get("name"),
+        email,
+        password: formData.get("password"),
+        role,
+      };
+  
+      const res = await isPassMatch(email , role , userData.password);
+      if(res){
+        const result = await Login(undefined, formData);
+        if (result?.success) {
+          localStorage.setItem("Current", JSON.stringify({email:userData.email , role:userData.role}))
+          router.push("/dashboard");
+        } else {
+          setLocalErrors(result.errors || {});
+        }
+      }else{
+       setLocalErrors({ email: ["Invalid credentials"] });
+      }
+  
+  
+    }
 
   return (
     <div className={styles.container}>
-      <form className={styles.form} action={action}>
+      <form className={styles.form} action={handleSubmit}>
         <Typography variant='h5' textAlign={'center'}>{user_role == "teacher" ? "Teacher" : "Student"} Login</Typography>
         <div style={{ display: 'table', width: '100%', marginBottom: 16 }}>
           <div style={{ display: 'table-row' }}>
@@ -61,11 +99,11 @@ export default function LoginForm({
           />
         </div>
           </div>
-          {state?.errors?.email && (
-        <div style={{ display: 'table-row' }}>
+          {localErrors.email && (
+            <div style={{ display: 'table-row' }}>
           <div style={{ display: 'table-cell' }}></div>
+            <Typography color="error" variant="body2">{localErrors.email}</Typography>
           <div style={{ display: 'table-cell' }}>
-            <Typography color="error" variant="body2">{state.errors.email}</Typography>
           </div>
         </div>
           )}

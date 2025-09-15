@@ -113,7 +113,7 @@ export async function writeAssignment(assignment: assignment) {
     subject: assignment.subject,
     teacher: assignment.teacher,
     dueDate: assignment.dueDate,
-    assignedStudents: assignment.student,
+    assignedStudents: assignment.assignedStudents,
     minCount : assignment.minCount,
     submitted: assignment.submitted,
   });

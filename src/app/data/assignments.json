@@ -146,7 +146,12 @@
       "myemail@gmail.com"
     ],
     "minCount": "30",
-    "submitted": []
+    "submitted": [
+      {
+        "student": "myemail@gmail.com",
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus gravida tempus sem in tincidunt. Donec lacinia imperdiet molestie. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum id augue at."
+      }
+    ]
   },
   {
     "name": "Assignment 3",

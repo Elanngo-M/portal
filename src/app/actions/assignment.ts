@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { filereader, filewriter, writeAssignment } from "../lib/filecompo";
 import { assignment} from "../lib/types";
+import { writeAssignmentIDB } from "../lib/utils";
 
 export async function AddAssingmenttoStudent(state: any, formData: FormData) {
   const studentsString = formData.get("students");
@@ -29,7 +30,7 @@ export async function AddAssingmenttoStudent(state: any, formData: FormData) {
 
     const assignment:assignment = {
       name: assignmentName,
-      student: selectedStudents.map((student) => student),
+      assignedStudents: selectedStudents.map((student) => student),
       subject: subject,
       teacher: teacher,
       dueDate: dueDate,
@@ -38,7 +39,7 @@ export async function AddAssingmenttoStudent(state: any, formData: FormData) {
     };
 
     console.log("Processing assignment:", assignment);
-    await writeAssignment(assignment);
+    await writeAssignmentIDB(assignment);
 
     return {
       success: true,

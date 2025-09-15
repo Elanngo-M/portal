@@ -1,37 +1,27 @@
+import { Logout } from "@mui/icons-material";
 import {
   AppBar,
   Box,
   Button,
-  Container,
-  Toolbar,
-  Typography,
-  Paper,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  TextField,
-  Rating,
-  Stack,
-  Tabs,
-  Tab,
+  CircularProgress,
   FormControl,
   InputLabel,
-  Select,
   MenuItem,
-  Alert,
-  CircularProgress
+  Select,
+  Toolbar,
+  Typography,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useState, useEffect, useActionState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/redux_files/state/store";
-import { SubmitAssignmentAnswer } from "../actions/assignment";
-import { assignment, assignmentSubmit } from "../lib/types";
-import { setStudentReduxData, submitAsstoRedux } from "../lib/utils";
-import { Logout1 } from "../actions/auth";
 import { useRouter } from "next/navigation";
-import { Logout } from "@mui/icons-material";
+import { useActionState, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { Logout1 } from "../actions/auth";
 import AssignmentTabs from "../lib/components/assignmentTabs";
+import { assignment, assignmentSubmit, Student } from "../lib/types";
+import {
+  getAssignment,
+  getStudent,
+  SubmitAssignmentAnswer
+} from "../lib/utils";
 
 export default function Studentboard() {
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
@@ -39,26 +29,44 @@ export default function Studentboard() {
     type: "success" | "error" | "warning";
     message: string;
   } | null>(null);
-  const [tabIndex, setTabIndex] = useState( Number(localStorage.getItem("tabIndex"))||0);
-  const student = useSelector((state: RootState) => state.StudentData);
+  const [tabIndex, setTabIndex] = useState(
+    Number(localStorage.getItem("tabIndex")) || 0
+  );
+
   const dispatch = useDispatch();
   const router = useRouter();
   const [state, action, pending] = useActionState(Logout1, undefined);
   const [loadingTabs, setLoadingTabs] = useState(false);
+  const [studentData, setStudentData] = useState<Student | null>(null);
+  const [assignments, setAssignments] = useState<assignment[]>([]);
 
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setStudentReduxData(dispatch);
+    const fetchData = async () => {
+      setLoading(true);
+      let current: any = localStorage.getItem("Current");
+      current = JSON.parse(current);
+      const stu = await getStudent(current.email);
+      const ass = (await getAssignment(current.email, "student")) ?? [];
+      setStudentData(stu);
+      setAssignments(ass);
+      setLoading(false);
+    };
+
+    fetchData();
   }, []);
 
-  
-useEffect(() => {
-  if (state?.success) {
-    localStorage.removeItem("UserData");
-    router.push("/");
-  }
-}, [state, router]);
+  // useEffect(() => {
+  //   setStudentReduxData(dispatch);
+  // }, []);
 
+  useEffect(() => {
+    if (state?.success) {
+      localStorage.removeItem("Current");
+      router.push("/");
+    }
+  }, [state, router]);
 
   function submitAss(
     name: string,
@@ -85,7 +93,7 @@ useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
     const payload: assignmentSubmit = {
       name,
-      studentName: student.data.email,
+      studentName: studentData?.email,
       subject,
       teacher,
       date: today,
@@ -99,7 +107,9 @@ useEffect(() => {
 
     SubmitAssignmentAnswer({}, formData).then((res) => {
       if (res?.success) {
-        submitAsstoRedux(dispatch, payload);
+        getAssignment(studentData?.email, "student").then((res) => {
+          setAssignments(res);
+        });
         setLocalAlert?.({
           type: "success",
           message: "Assignment submitted successfully!",
@@ -132,22 +142,18 @@ useEffect(() => {
     setDueOrder(value);
     localStorage.setItem("dueOrder", value);
   };
-  const handleTabIndexChange = (value:number) => {
-    
-setLoadingTabs(true);
-  setTabIndex(value);
-  localStorage.setItem("tabIndex", value.toString());
+  const handleTabIndexChange = (value: number) => {
+    setLoadingTabs(true);
+    setTabIndex(value);
+    localStorage.setItem("tabIndex", value.toString());
 
-  setTimeout(() => {
-    setLoadingTabs(false);
-  }, Math.random()*5*100);
-
+    setTimeout(() => {
+      setLoadingTabs(false);
+    }, Math.random() * 5 * 100);
   };
 
-  const subjects = Array.from(
-    new Set(student.assignments.map((a) => a.subject))
-  );
-  const filteredAssignments = student.assignments
+  const subjects = Array.from(new Set(assignments.map((a) => a.subject)));
+  const filteredAssignments = assignments
     .filter((a) => subjectFilter === "All" || a.subject === subjectFilter)
     .sort((a, b) => {
       const dateA = new Date(a.dueDate).getTime();
@@ -156,19 +162,19 @@ setLoadingTabs(true);
     });
 
   const pendingAssignments = filteredAssignments.filter(
-    (a) => !a.submitted?.some((s) => s.student === student.data.email)
+    (a) => !a.submitted?.some((s) => s.student === studentData?.email)
   );
 
   const gradedAssignments = filteredAssignments.filter((a) => {
     const submission = a.submitted?.find(
-      (s) => s.student === student.data.email
+      (s) => s.student === studentData?.email
     );
     return submission && submission.grade != null;
   });
 
   const submittedAssignments = filteredAssignments.filter((a) => {
     const submission = a.submitted?.find(
-      (s) => s.student === student.data.email
+      (s) => s.student === studentData?.email
     );
     return submission && submission.grade == null;
   });
@@ -181,8 +187,10 @@ setLoadingTabs(true);
             Student Dashboard
           </Typography>
           <Box sx={{ textAlign: "right" }}>
-            <Typography variant="body2">Email: {student.data.email}</Typography>
-            <Typography variant="body2">Name: {student.data.name}</Typography>
+            <Typography variant="body2">Email: {studentData?.email}</Typography>
+            <Typography variant="body2">
+              Name: {studentData?.data.name}
+            </Typography>
           </Box>
           <form action={action} style={{ marginLeft: "10px" }}>
             <Button
@@ -235,27 +243,26 @@ setLoadingTabs(true);
       {/* Tabs */}
 
       <Box sx={{ mt: 4 }}>
-  {loadingTabs ? (
-    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-      <CircularProgress />
-    </Box>
-  ) : (
-    <AssignmentTabs
-      setAlert={setAlert}
-      alert={alert}
-      tabIndex={tabIndex}
-      setTabIndex={handleTabIndexChange}
-      pendingAssignments={pendingAssignments}
-      submittedAssignments={submittedAssignments}
-      gradedAssignments={gradedAssignments}
-      studentEmail={student.data.email}
-      answers={answers}
-      setAnswers={setAnswers}
-      onSubmit={submitAss}
-    />
-  )}
+        {loadingTabs ? (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <AssignmentTabs
+            setAlert={setAlert}
+            alert={alert}
+            tabIndex={tabIndex}
+            setTabIndex={handleTabIndexChange}
+            pendingAssignments={pendingAssignments}
+            submittedAssignments={submittedAssignments}
+            gradedAssignments={gradedAssignments}
+            studentEmail={studentData?.email}
+            answers={answers}
+            setAnswers={setAnswers}
+            onSubmit={submitAss}
+          />
+        )}
       </Box>
-
     </div>
   );
 }
