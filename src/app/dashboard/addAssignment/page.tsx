@@ -2,14 +2,20 @@
 
 import { AddAssingmenttoStudent } from "@/app/actions/assignment";
 import { Logout1 } from "@/app/actions/auth";
-import { setAllStudentReduxData, setTeacherReduxData } from "@/app/lib/utils";
-import { RootState } from "@/redux_files/state/store";
+import { assignment, Student, Teacher } from "@/app/lib/types";
+import {
+  getAllStudent,
+  getAssignment,
+  getTeacher,
+  writeAssignmentIDB
+} from "@/app/lib/utils";
 import {
   CheckBoxOutlineBlank,
   CheckBoxOutlineBlankOutlined,
   Logout,
 } from "@mui/icons-material";
 import {
+  Alert,
   AppBar,
   Autocomplete,
   Box,
@@ -20,19 +26,18 @@ import {
   FormControlLabel,
   Input,
   Paper,
+  Snackbar,
   TextField,
   Toolbar,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { useActionState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
 export default function AddAssignment() {
-  const Allstudent = useSelector((state: RootState) => state.AllStudentData);
-  const teacher = useSelector((state: RootState) => state.TeacherData);
+  const [studentData, setStudentData] = React.useState<Student[]>([]);
+  const [teacher, setTeacher] = React.useState<Teacher | null>(null);
   const router = useRouter();
-  const dispatch = useDispatch();
 
   const [state, action, pending] = useActionState(Logout1, undefined);
   const [astate, aaction, a_pending] = useActionState(
@@ -44,14 +49,34 @@ export default function AddAssignment() {
   const [selectAll, setSelectAll] = React.useState<boolean>(false);
   const [nameError, setNameError] = React.useState<string | null>(null);
   const [dueDate, setDueDate] = React.useState<string>("");
-  const [minCount, setMinCount] = React.useState<number | null>(null);
+  const [minCount, setMinCount] = React.useState<number>(0);
+  const [assignments, setAssignments] = React.useState<assignment[]>([]);
+  const [assignmentName, setAssignmentName] = React.useState<string>("");
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
 
-  const allOptions = (Allstudent.students || []).map((student: any) => ({
+
+
+  const allOptions = (studentData || []).map((student: any) => ({
     email: student.email,
     name: student.data.name,
   }));
 
   const today = new Date().toISOString().slice(0, 10);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let current: any = localStorage.getItem("Current");
+      current = JSON.parse(current);
+      const teach = await getTeacher(current.email);
+      const ass = (await getAssignment(current.email, "teacher")) ?? [];
+      const stu = await getAllStudent();
+      setTeacher(teach);
+      setAssignments(ass);
+      setStudentData(stu);
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (state?.success) {
@@ -61,11 +86,6 @@ export default function AddAssignment() {
   }, [state, router]);
 
   useEffect(() => {
-    setTeacherReduxData(dispatch);
-    setAllStudentReduxData(dispatch);
-  }, []);
-
-  useEffect(() => {
     if (astate?.success) {
       router.push("/dashboard");
     }
@@ -73,7 +93,7 @@ export default function AddAssignment() {
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.trim().toLowerCase();
-    const exists = Allstudent.assignments.some(
+    const exists = assignments.some(
       (a: any) => a.name?.trim().toLowerCase() === value
     );
     setNameError(exists ? "Assignment name already exists" : null);
@@ -94,10 +114,60 @@ export default function AddAssignment() {
   const isFormValid =
     !nameError && isDueDateValid && isMinCountValid && columns.length > 0;
 
-  const handleSubmit = async (formData: FormData) => {
-    formData.set("students", JSON.stringify(columns));
-    return await aaction(formData);
-  };
+  const handleSubmit = async (event: any, formData: FormData) => {
+  event.preventDefault();
+
+  const studentsString = JSON.stringify(columns);
+  const subject = formData.get("subject");
+  const teacher = formData.get("teacher");
+  const dueDate = formData.get("dueDate");
+  const minCount = formData.get("minCount");
+
+  try {
+    const selectedStudents = JSON.parse(studentsString as string);
+
+    const assignment: assignment = {
+      name: assignmentName,
+      assignedStudents: selectedStudents.map((student: Student) => student),
+      subject: subject,
+      teacher: teacher,
+      dueDate: dueDate,
+      minCount: minCount,
+      submitted: [],
+    };
+
+    console.log("Processing assignment:", assignment);
+    await writeAssignmentIDB(assignment);
+
+    let current: any = localStorage.getItem("Current");
+    current = JSON.parse(current);
+    const ass = (await getAssignment(current.email, "teacher")) ?? [];
+    setAssignments(ass);
+
+    // ✅ Clear form
+    setAssignmentName("");
+    setColumns([]);
+    setSelectAll(false);
+    setNameError(null);
+    setDueDate("");
+    setMinCount(0);
+
+    // ✅ Show success snackbar
+    setSnackbarOpen(true);
+
+    return {
+      success: true,
+      message: `Assignment created for ${selectedStudents.length} students`,
+    };
+  } catch (error) {
+    console.error("Error processing assignment:", error);
+    return {
+      error: "Failed to create assignment",
+      details: error instanceof Error ? error.message : String(error),
+    };
+  }
+};
+
 
   return (
     <div>
@@ -106,9 +176,9 @@ export default function AddAssignment() {
           <Toolbar disableGutters>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
               {[
-                `Email: ${teacher.email}`,
-                `Name: ${teacher.name}`,
-                `Subject: ${teacher.subject}`,
+                `Email: ${teacher?.email}`,
+                `Name: ${teacher?.name}`,
+                `Subject: ${teacher?.subject}`,
               ].map((page) => (
                 <Button
                   key={page}
@@ -134,8 +204,13 @@ export default function AddAssignment() {
         </Container>
       </AppBar>
 
-      <form
-        action={handleSubmit}
+      <form  
+      onSubmit={(event) => {
+          event.preventDefault();
+          const formData = new FormData(event.currentTarget);
+          handleSubmit(event, formData);
+        }}
+
         style={{
           marginTop: 24,
           maxWidth: 500,
@@ -144,15 +219,24 @@ export default function AddAssignment() {
         }}
       >
         <TextField
-          name="name"
-          label="Assignment Name"
-          fullWidth
-          margin="normal"
-          required
-          error={!!nameError}
-          helperText={nameError}
-          onChange={handleNameChange}
-        />
+  name="name"
+  label="Assignment Name"
+  fullWidth
+  margin="normal"
+  required
+  error={!!nameError}
+  helperText={nameError}
+  value={assignmentName}
+  onChange={(e) => {
+    const value = e.target.value;
+    setAssignmentName(value);
+    const exists = assignments.some(
+      (a: any) => a.name?.trim().toLowerCase() === value.trim().toLowerCase()
+    );
+    setNameError(exists ? "Assignment name already exists" : null);
+  }}
+/>
+
 
         <Autocomplete
           multiple
@@ -182,8 +266,10 @@ export default function AddAssignment() {
               placeholder="Students"
             />
           )}
-          renderOption={(props, option, { selected }) => (
-            <li {...props}>
+          renderOption={(props, option, { selected }) => {
+            let {key , ...otherprops} = props;
+            return(
+            <li key={key} {...otherprops}>
               <Checkbox
                 icon={<CheckBoxOutlineBlankOutlined fontSize="small" />}
                 checkedIcon={<CheckBoxOutlineBlank fontSize="small" />}
@@ -192,7 +278,7 @@ export default function AddAssignment() {
               />
               {option.name} ({option.email})
             </li>
-          )}
+          )}}
           PaperComponent={(paperProps) => {
             const { children, ...restPaperProps } = paperProps;
             return (
@@ -240,7 +326,7 @@ export default function AddAssignment() {
 
         <input
           name="subject"
-          value={teacher.subject ?? ""}
+          value={teacher?.subject ?? ""}
           type="text"
           readOnly
           hidden
@@ -248,7 +334,7 @@ export default function AddAssignment() {
         <input name="assignedDate" value={today} type="text" readOnly hidden />
         <input
           name="teacher"
-          value={teacher.email ?? ""}
+          value={teacher?.email ?? ""}
           type="text"
           readOnly
           hidden
@@ -263,6 +349,17 @@ export default function AddAssignment() {
           Add Assignment
         </Button>
       </form>
+      <Snackbar
+  open={snackbarOpen}
+  autoHideDuration={3000}
+  onClose={() => setSnackbarOpen(false)}
+  anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+>
+  <Alert severity="success" onClose={() => setSnackbarOpen(false)}>
+    Assignment submitted successfully!
+  </Alert>
+</Snackbar>
+
     </div>
   );
 }

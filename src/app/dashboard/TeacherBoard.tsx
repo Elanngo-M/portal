@@ -24,13 +24,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setAllStudentReduxData, setTeacherReduxData } from "../lib/utils";
+import { getAllStudent, getAssignment, getTeacher, setAllStudentReduxData, setTeacherReduxData } from "../lib/utils";
 import { SubmitRating } from "../actions/assignment";
 import TeacherAssignmentList from "../lib/components/teacherAssignmnetList";
+import { assignment, Student, Teacher } from "../lib/types";
 
 export default function Teacherboard() {
-  const Allstudent = useSelector((state: RootState) => state.AllStudentData);
-  const teacher = useSelector((state: RootState) => state.TeacherData);
+  const [teacher , setTeacher] = useState<Teacher | null>(null);
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -40,26 +40,36 @@ export default function Teacherboard() {
     undefined
   );
   const [rating, setRating] = useState<number>(0);
+  const [studentData, setStudentData] = useState<Student[]>([]);
+  const [assignments, setAssignments] = useState<assignment[]>([]);
   const [tabIndex, setTabIndex] = useState(0);
+  
+    useEffect(() => {
+      const fetchData = async () => {
+        let current: any = localStorage.getItem("Current");
+        current = JSON.parse(current);
+        const teach = await getTeacher(current.email);
+        const ass = (await getAssignment(current.email, "teacher")) ?? [];
+        const stu = await getAllStudent();
+        setTeacher(teach);
+        setAssignments(ass);
+        setStudentData(stu);
+      };
+  
+      fetchData();
+    }, []);
 
   useEffect(() => {
     if (state?.success) {
-      localStorage.removeItem("UserData");
+      localStorage.removeItem("Current");
       router.push("/login");
     }
   }, [state, router]);
 
-  useEffect(() => {
-    setTeacherReduxData(dispatch);
-    setAllStudentReduxData(dispatch);
-  }, [router]);
-
-  const teacherAssignments = Allstudent.assignments.filter(
-    (a: any) => a.teacher === teacher.email
-  );
 
 
-  const pendingAssignments = teacherAssignments.filter(
+
+  const pendingAssignments = assignments.filter(
     (a: any) => a.submitted.length < a.assignedStudents.length
   );
 
@@ -77,18 +87,18 @@ export default function Teacherboard() {
     }
   );
 
-  const nonGradedAssignments = teacherAssignments.filter((a: any) =>
+  const nonGradedAssignments = assignments.filter((a: any) =>
     a.submitted.some((s: any) => s.grade == null)
   );
 
-  const gradedAssignments = teacherAssignments.filter((a: any) =>
+  const gradedAssignments = assignments.filter((a: any) =>
     a.submitted.some((s: any) => s.grade != null)
   );
 
   const pages = [
-    `Email: ${teacher.email}`,
-    `Name: ${teacher.name}`,
-    `Subject: ${teacher.subject}`,
+    `Email: ${teacher?.email}`,
+    `Name: ${teacher?.name}`,
+    `Subject: ${teacher?.subject}`,
   ];
 
   function ResponsiveAppBar() {
@@ -212,8 +222,8 @@ export default function Teacherboard() {
             </Button>
 
             <StudentAnalyticsTable
-              students={Allstudent.students}
-              assignments={teacherAssignments}
+              students={studentData}
+              assignments={assignments}
             />
           </>
         )}
@@ -223,7 +233,7 @@ export default function Teacherboard() {
             assignments={pendingAssignmentsWithMissingStudents}
             rateAction={rateAction}
             ratePending={ratePending}
-            students={Allstudent.students}
+            students={studentData}
             showMissingStudents={true}
           />
         )}
@@ -233,7 +243,7 @@ export default function Teacherboard() {
             assignments={nonGradedAssignments}
             rateAction={rateAction}
             ratePending={ratePending}
-            students={Allstudent.students}
+            students={studentData}
           />
         )}
 
@@ -242,7 +252,7 @@ export default function Teacherboard() {
             assignments={gradedAssignments}
             rateAction={rateAction}
             ratePending={ratePending}
-            students={Allstudent.students}
+            students={studentData}
           />
         )}
       </Box>

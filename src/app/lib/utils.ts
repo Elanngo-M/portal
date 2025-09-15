@@ -560,6 +560,18 @@ export async function getStudent(email:any){
   return value
 }
 
+export async function getAllStudent(){
+  const myDB = await openDB("MyDB", myDBversion);
+  const value = await myDB.getAll("Students");
+  return value
+}
+
+export async function getTeacher(email:any){
+  const myDB = await openDB("MyDB", myDBversion);
+  const value = await myDB.get("Teachers" , email);
+  return value
+}
+
 export async function getAssignment(email:any , role:any){
   const myDB = await openDB("MyDB", myDBversion);
   let res= <any>[];

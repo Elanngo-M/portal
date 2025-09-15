@@ -33,7 +33,6 @@ export default function Studentboard() {
     Number(localStorage.getItem("tabIndex")) || 0
   );
 
-  const dispatch = useDispatch();
   const router = useRouter();
   const [state, action, pending] = useActionState(Logout1, undefined);
   const [loadingTabs, setLoadingTabs] = useState(false);
