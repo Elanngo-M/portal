@@ -192,6 +192,7 @@ export default function SignupForm() {
     }
   }}
   fullWidth
+  InputLabelProps={{ shrink: true }}
   label="Upload Profile Image"
   variant="outlined"
 />
