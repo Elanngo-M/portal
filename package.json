@@ -9,14 +9,18 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@date-io/date-fns": "^3.2.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fontsource/roboto": "^5.2.6",
     "@mui/icons-material": "^7.3.2",
     "@mui/joy": "^5.0.0-beta.52",
+    "@mui/lab": "^7.0.0-beta.17",
     "@mui/material": "^7.3.2",
+    "@mui/x-date-pickers": "^8.11.2",
     "@reduxjs/toolkit": "^2.9.0",
     "cookies-next": "^6.1.0",
+    "date-fns": "^4.1.0",
     "idb": "^8.0.3",
     "jose": "^6.1.0",
     "next": "15.5.2",

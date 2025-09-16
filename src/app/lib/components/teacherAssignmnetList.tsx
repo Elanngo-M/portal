@@ -9,6 +9,10 @@ import {
   List,
   ListItem,
   ListItemText,
+  Stack,
+  Card,
+  Container,
+  Divider,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import React, { useState } from "react";
@@ -52,136 +56,118 @@ export default function TeacherAssignmentList({
 
   return (
     <div style={{ marginTop: "2rem" }}>
-      {assignments.map((assignment) => {
-        const submissions = assignment.submitted || [];
+  {assignments.map((assignment) => {
+    const submissions = assignment.submitted || [];
 
-        return (
-          <div key={assignment.name} style={{ marginBottom: "2rem" }}>
-            <Typography variant="h6" sx={{ mb: 1 }}>
-              {assignment.name} ({assignment.dueDate})
-            </Typography>
+    return (
+      <Container key={assignment.name} sx={{ padding: 3, marginBottom: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          {assignment.name} — <em>{assignment.dueDate}</em>
+        </Typography>
 
-            {/* Show missing students if enabled */}
-            {showMissingStudents && (
-              <>
-                <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                  <strong>Missing Submissions:</strong>
+        {/* Missing Submissions Accordion */}
+        {showMissingStudents && (
+          <Accordion sx={{ marginBottom: 2 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="subtitle1">
+                Missing Submissions ({assignment.missingStudents?.length})
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              {assignment.missingStudents?.length === 0 ? (
+                <Typography variant="body2" color="success.main">
+                  ✅ All students have submitted this assignment.
                 </Typography>
-                {assignment.missingStudents?.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary">
-                    All students have submitted this assignment.
-                  </Typography>
-                ) : (
-                  <List dense>
-                    {assignment.missingStudents.map((email: string) => (
-                      <ListItem key={email}>
-                        <ListItemText
-                          primary={`${getStudentName(email)} (${email})`}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                )}
-              </>
-            )}
-
-            {/* Show submitted assignments */}
-            {!showMissingStudents &&  submissions.length > 0 &&
-              submissions.map((submission:any, index:any) => {
-                const isGraded = submission.grade != null;
-                const studentName = getStudentName(submission.student);
-                const key = getKey(assignment.name, submission.student);
-                const currentRating =
-                  ratings[key] ?? submission.grade ?? 0;
-
-                return (
-                  <Accordion
-                    key={`${assignment.name}-${submission.student}-${index}`}
-                  >
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography>
-                        {studentName} ({submission.student})
+              ) : (
+                <Stack spacing={1}>
+                  {assignment.missingStudents.map((email: string) => (
+                    <Paper key={email} variant="outlined" sx={{ padding: 1 }}>
+                      <Typography variant="body2">
+                        <strong>{getStudentName(email)}</strong> — <em>{email}</em>
                       </Typography>
-                    </AccordionSummary>
+                    </Paper>
+                  ))}
+                </Stack>
+              )}
+            </AccordionDetails>
+          </Accordion>
+        )}
 
-                    <AccordionDetails>
-                      <Paper elevation={2} sx={{ p: 2 }}>
-                        <Typography variant="body2">
-                          <strong>Due Date:</strong> {assignment.dueDate}
+        {/* Submitted Assignments Accordion */}
+        {!showMissingStudents && submissions.length > 0 &&
+          submissions.map((submission: any, index: any) => {
+            const isGraded = submission.grade != null;
+            const studentName = getStudentName(submission.student);
+            const key = getKey(assignment.name, submission.student);
+            const currentRating = ratings[key] ?? submission.grade ?? 0;
+
+            return (
+              <Accordion key={`${assignment.name}-${submission.student}-${index}`} sx={{ marginBottom: 2 }}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography>
+                    {studentName} ({submission.student})
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Paper elevation={1} sx={{ padding: 2 }}>
+                    <Typography variant="body2">
+                      <strong>Due Date:</strong> {assignment.dueDate}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 2 }}>
+                      <strong>Answer:</strong>
+                    </Typography>
+                    <Typography sx={{ mt: 1 }}>{submission.answer}</Typography>
+
+                    {!isGraded ? (
+                      <>
+                        <form action={rateAction}>
+                          <input type="hidden" name="assignmentName" value={assignment.name} />
+                          <input type="hidden" name="studentName" value={submission.student} />
+                          <input type="hidden" name="rating" value={currentRating} />
+                          <input type="hidden" name="teacher" value={assignment.teacher} />
+
+                          <Rating
+                            name={`rating-${key}`}
+                            precision={0.5}
+                            value={currentRating}
+                            onChange={(event, newValue) => handleRatingChange(key, newValue)}
+                            sx={{ mt: 2 }}
+                          />
+
+                          <Button
+                            sx={{ mt: 2 }}
+                            onClick={() => {
+                              rateAction({
+                                assignmentName: assignment.name,
+                                studentName: submission.student,
+                                rating: currentRating,
+                                teacher: assignment.teacher,
+                              });
+                            }}
+                            disabled={ratePending}
+                            variant="contained"
+                          >
+                            Submit Grade
+                          </Button>
+                        </form>
+                      </>
+                    ) : (
+                      <>
+                        <Typography sx={{ mt: 2 }}>
+                          <strong>Grade:</strong>
                         </Typography>
-                        <Typography variant="body2" sx={{ mt: 2 }}>
-                          <strong>Answer:</strong>
-                        </Typography>
-                        <Typography sx={{ mt: 1 }}>
-                          {submission.answer}
-                        </Typography>
+                        <Rating value={submission.grade} readOnly />
+                      </>
+                    )}
+                  </Paper>
+                </AccordionDetails>
+              </Accordion>
+            );
+          })}
+      </Container>
+    );
+  })}
+</div>
 
-                        {!isGraded ? (
-                          <form action={rateAction}>
-                            <input
-                              type="hidden"
-                              name="assignmentName"
-                              value={assignment.name}
-                            />
-                            <input
-                              type="hidden"
-                              name="studentName"
-                              value={submission.student}
-                            />
-                            <input
-                              type="hidden"
-                              name="rating"
-                              value={currentRating}
-                            />
-                            <input
-                              type="hidden"
-                              name="teacher"
-                              value={assignment.teacher}
-                            />
-
-                            <Rating
-                              name={`rating-${key}`}
-                              precision={0.5}
-                              value={currentRating}
-                              onChange={(event, newValue) =>
-                                handleRatingChange(key, newValue)
-                              }
-                              sx={{ mt: 2 }}
-                            />
-
-                            <Button
-  sx={{ mt: 2 }}
-  onClick={() => {
-    rateAction({
-      assignmentName: assignment.name,
-      studentName: submission.student,
-      rating: currentRating,
-      teacher: assignment.teacher,
-    });
-  }}
-  disabled={ratePending}
-  variant="contained"
->
-  Submit Grade
-</Button>
-
-                          </form>
-                        ) : (
-                          <>
-                            <Typography sx={{ mt: 2 }}>
-                              <strong>Grade:</strong>
-                            </Typography>
-                            <Rating value={submission.grade} readOnly />
-                          </>
-                        )}
-                      </Paper>
-                    </AccordionDetails>
-                  </Accordion>
-                );
-              })}
-          </div>
-        );
-      })}
-    </div>
   );
 }

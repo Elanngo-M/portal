@@ -4,6 +4,7 @@ import { Logout1 } from "@/app/actions/auth";
 import {
   Box,
   Button,
+  Container,
   Paper,
   Tab,
   Table,
@@ -12,7 +13,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tabs
+  Tabs,
 } from "@mui/material";
 import { openDB } from "idb";
 import Link from "next/link";
@@ -26,16 +27,16 @@ import {
   getAllStudent,
   getAssignment,
   getTeacher,
-  myDBversion
+  myDBversion,
 } from "../lib/utils";
+import styles from "./dashboard.module.css";
+import { useThemeContext } from "../ThemeContext";
 
 export default function Teacherboard() {
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const router = useRouter();
-  const dispatch = useDispatch();
-
+  const {mode} = useThemeContext();
   const [state, action, pending] = useActionState(Logout1, undefined);
-  const [rating, setRating] = useState<number>(0);
   const [studentData, setStudentData] = useState<Student[]>([]);
   const [assignments, setAssignments] = useState<assignment[]>([]);
   const [tabIndex, setTabIndex] = useState(0);
@@ -63,42 +64,41 @@ export default function Teacherboard() {
   }, [state, router]);
 
   async function handleRatingSubmit({
-  assignmentName,
-  studentName,
-  rating,
-  teacher,
-}: {
-  assignmentName: string;
-  studentName: string;
-  rating: number;
-  teacher: string;
-}) {
-  try {
-    const assignmentIndex = assignments.findIndex(
-      (a) => a.name === assignmentName && a.teacher === teacher
-    );
+    assignmentName,
+    studentName,
+    rating,
+    teacher,
+  }: {
+    assignmentName: string;
+    studentName: string;
+    rating: number;
+    teacher: string;
+  }) {
+    try {
+      const assignmentIndex = assignments.findIndex(
+        (a) => a.name === assignmentName && a.teacher === teacher
+      );
 
-    if (assignmentIndex === -1) return;
+      if (assignmentIndex === -1) return;
 
-    const assignment = assignments[assignmentIndex];
-    const submissionIndex = assignment.submitted.findIndex(
-      (s) => s.student === studentName
-    );
+      const assignment = assignments[assignmentIndex];
+      const submissionIndex = assignment.submitted.findIndex(
+        (s) => s.student === studentName
+      );
 
-    if (submissionIndex === -1) return;
+      if (submissionIndex === -1) return;
 
-    assignment.submitted[submissionIndex].grade = Number(rating);
+      assignment.submitted[submissionIndex].grade = Number(rating);
 
-    const myDB = await openDB("MyDB", myDBversion);
-    await myDB.put("Assignments", assignment);
+      const myDB = await openDB("MyDB", myDBversion);
+      await myDB.put("Assignments", assignment);
 
-    const AllAssignments = await getAssignment(teacher , "teacher");
-    setAssignments(AllAssignments);
-  } catch (error) {
-    console.error("Error submitting rating:", error);
+      const AllAssignments = await getAssignment(teacher, "teacher");
+      setAssignments(AllAssignments);
+    } catch (error) {
+      console.error("Error submitting rating:", error);
+    }
   }
-}
-
 
   const pendingAssignments = assignments.filter(
     (a: any) => a.submitted.length < a.assignedStudents.length
@@ -196,66 +196,68 @@ export default function Teacherboard() {
   }
 
   return (
-    <div>
-      <HeaderBar
-        title="Teacher Dashboard"
-        teacher={teacher}
-        action={action}
-        pending={pending}
-        student={null}
-      />
+    <div  className={mode == "light" ? styles.container : styles.container_dark}>
+      <div>
+        <HeaderBar
+          title="Teacher Dashboard"
+          teacher={teacher}
+          action={action}
+          pending={pending}
+          student={null}
+        />
 
-      <Box sx={{ mt: 4 }}>
-        <Tabs
-          value={tabIndex}
-          onChange={(e, newValue) => setTabIndex(newValue)}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          <Tab label="Student Analytics" />
-          <Tab label={`Pending (${pendingAssignments.length})`} />
-          <Tab label={`Non-Graded (${nonGradedAssignments.length})`} />
-          <Tab label={`Graded (${gradedAssignments.length})`} />
-        </Tabs>
+        <Box sx={{ mt: 4 }}>
+          <Tabs
+            value={tabIndex}
+            onChange={(e, newValue) => setTabIndex(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            <Tab label="Student Analytics" />
+            <Tab label={`Pending (${pendingAssignments.length})`} />
+            <Tab label={`Non-Graded (${nonGradedAssignments.length})`} />
+            <Tab label={`Graded (${gradedAssignments.length})`} />
+          </Tabs>
 
-        {tabIndex === 0 && (
-          <>
-            <Button variant="outlined" sx={{ mt: 2 }}>
-              <Link href="/dashboard/addAssignment">Add Assignment</Link>
-            </Button>
+          {tabIndex === 0 && (
+            <Container>
+              <Button variant={mode =="light" ? "outlined" : "contained"} sx={{ mt: 2, background: "white" }}>
+                <Link href="/dashboard/addAssignment">Add Assignment</Link>
+              </Button>
 
-            <StudentAnalyticsTable
+              <StudentAnalyticsTable
+                students={studentData}
+                assignments={assignments}
+              />
+            </Container>
+          )}
+
+          {tabIndex === 1 && (
+            <TeacherAssignmentList
+              assignments={pendingAssignmentsWithMissingStudents}
+              rateAction={handleRatingSubmit}
               students={studentData}
-              assignments={assignments}
+              showMissingStudents={true}
             />
-          </>
-        )}
+          )}
 
-        {tabIndex === 1 && (
-          <TeacherAssignmentList
-            assignments={pendingAssignmentsWithMissingStudents}
-            rateAction={handleRatingSubmit}
-            students={studentData}
-            showMissingStudents={true}
-          />
-        )}
+          {tabIndex === 2 && (
+            <TeacherAssignmentList
+              assignments={nonGradedAssignments}
+              rateAction={handleRatingSubmit}
+              students={studentData}
+            />
+          )}
 
-        {tabIndex === 2 && (
-          <TeacherAssignmentList
-            assignments={nonGradedAssignments}
-            rateAction={handleRatingSubmit}
-            students={studentData}
-          />
-        )}
-
-        {tabIndex === 3 && (
-          <TeacherAssignmentList
-            assignments={gradedAssignments}
-            rateAction={handleRatingSubmit}
-            students={studentData}
-          />
-        )}
-      </Box>
+          {tabIndex === 3 && (
+            <TeacherAssignmentList
+              assignments={gradedAssignments}
+              rateAction={handleRatingSubmit}
+              students={studentData}
+            />
+          )}
+        </Box>
+      </div>
     </div>
   );
 }
@@ -292,4 +294,4 @@ export default function Teacherboard() {
 //       </Container>
 //     </AppBar>
 //   );
-// }
+// }Ō

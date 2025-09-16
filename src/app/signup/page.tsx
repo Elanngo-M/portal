@@ -1,15 +1,28 @@
-"use client";
+'use client';
 
 import { signup } from "@/app/actions/auth";
-import { Button, Input, TextField, Typography } from "@mui/material";
-import Option from "@mui/joy/Option";
-import Select from "@mui/joy/Select";
+import {
+  Button,
+  IconButton,
+  InputAdornment,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+  FormHelperText,
+  Link,
+  Select,
+  MenuItem,
+  
+} from "@mui/material";
+import { Logout, Visibility, VisibilityOff } from "@mui/icons-material";
 import { useActionState, useEffect, useState } from "react";
 import styles from "./signup.module.css";
-import { Logout } from "@mui/icons-material";
-import { FormErrors, FormState, SingupFormState } from "../lib/types";
+import { FormErrors, SingupFormState } from "../lib/types";
 import { useRouter } from "next/navigation";
 import { addStudent, addTeacher, isUserRegistered, useDB } from "../lib/utils";
+import { useThemeContext } from "../ThemeContext";
+import { useTheme } from "@mui/material/styles";
 
 export default function SignupForm() {
   const router = useRouter();
@@ -17,16 +30,18 @@ export default function SignupForm() {
     signup,
     undefined
   );
-  
-const [localErrors, setLocalErrors] = useState<FormErrors>({});
-const [success, setSuccess] = useState<boolean>(false);
 
+  const [localErrors, setLocalErrors] = useState<FormErrors>({});
   const [role, setRole] = useState<"teacher" | "student">("student");
   const [subject, setSubject] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    useDB();
-  }, []);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const { mode } = useThemeContext();
+  const theme = useTheme();
 
   useEffect(() => {
     if (state?.success) {
@@ -36,35 +51,38 @@ const [success, setSuccess] = useState<boolean>(false);
     }
   }, [state, router]);
 
-  async function handleSubmit(formData: FormData) {
-    const email = formData.get("email") as string;
-    const role = formData.get("role") as "teacher" | "student";
+  async function handleSubmit() {
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("role", role);
+    if (role === "teacher") {
+      formData.append("subject", subject);
+    }
 
-    const alreadyRegistered = await isUserRegistered(email , role);
+    const alreadyRegistered = await isUserRegistered(email, role);
 
     if (alreadyRegistered) {
-      // Update local error state
       setLocalErrors({ email: ["Email already registered!!"] });
       return;
     }
 
-    // Prepare user data
     const userData: any = {
-      name: formData.get("name"),
+      name,
       email,
-      password: formData.get("password"),
+      password,
       role,
     };
 
     if (role === "teacher") {
-      userData.subject = formData.get("subject");
+      userData.subject = subject;
       addTeacher(userData);
-      localStorage.setItem("Current", JSON.stringify({email:userData.email , role:userData.role}))
-    }else{
+      localStorage.setItem("Current", JSON.stringify({ email: userData.email, role: userData.role }));
+    } else {
       addStudent(userData);
     }
 
-    // Call server-side signup to create session
     const result = await signup(undefined, formData);
 
     if (result?.success) {
@@ -74,112 +92,122 @@ const [success, setSuccess] = useState<boolean>(false);
     }
   }
 
-  function handleRoleChange(event: any, newRole: any) {
-    if (newRole == "teacher") {
-      setRole("teacher");
-    } else {
-      setRole("student");
-    }
-  }
-
-  function handleSubjectChange(event: any, newSub: any) {
-    setSubject(newSub);
-  }
   return (
-    <div className={styles.container}>
-      <form action={handleSubmit} className={styles.container}>
-        <Typography variant="h5" textAlign={"center"}>
-          Signup Form
-        </Typography>
-        <div className={styles.inputDiv}>
-          <label htmlFor="name">Name:</label>
-          <TextField
-            id="name"
-            name="name"
-            placeholder="Name"
-            variant="outlined"
-          />
-        </div>
-        {state?.errors?.name && <p>{state.errors.name}</p>}
+    <div className={mode === "light" ? styles.container : styles.container_dark}>
+      <Paper
+        elevation={3}
+        sx={{
+          padding: 4,
+          maxWidth: 500,
+          margin: 'auto',
+          bgcolor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+        }}
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+        >
+          <Stack spacing={3}>
+            <Typography variant="h5" textAlign="center">Signup Form</Typography>
 
-        <div className={styles.inputDiv}>
-          <label htmlFor="email">Email:</label>
-          <TextField
-            id="email"
-            name="email"
-            placeholder="email@gmail.com"
-            variant="outlined"
-          />
-        </div>
-        
-        {(state?.errors?.email || localErrors?.email) && (
-          <p>{(state?.errors?.email || localErrors?.email)??[][0] }</p>
-        )}
+            <TextField
+              label="Name"
+              name="name"
+              variant="outlined"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              error={!!state?.errors?.name}
+              helperText={state?.errors?.name}
+              fullWidth
+            />
 
+            <TextField
+              label="Email"
+              name="email"
+              variant="outlined"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={!!(state?.errors?.email || localErrors?.email)}
+              helperText={state?.errors?.email || localErrors?.email?.[0]}
+              fullWidth
+            />
 
-        <div className={styles.inputDiv}>
-          <label htmlFor="password">Password:</label>
-          <TextField
-            id="password"
-            name="password"
-            type="password"
-            variant="outlined"
-          />
-        </div>
-        {state?.errors?.password && (
-          <div>
-            <p>Password must:</p>
-            <ul>
-              {state.errors.password.map((error) => (
-                <li key={error}>- {error}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <div className={styles.inputDiv}>
-          <label htmlFor="role">Role</label>
-          <Select
-            onChange={handleRoleChange}
-            value={role}
-            id="role"
-            name="role"
-            disabled={false}
-            variant="outlined"
-          >
-            <Option value={"teacher"}>Teacher</Option>
-            <Option value={"student"}>Student</Option>
-          </Select>
-        </div>
+            <TextField
+              label="Password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              variant="outlined"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!state?.errors?.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              fullWidth
+            />
+            {state?.errors?.password && (
+              <FormHelperText error>
+                <ul style={{ margin: 0, paddingLeft: 20 }}>
+                  {state.errors.password.map((err, idx) => (
+                    <li key={idx}>{err}</li>
+                  ))}
+                </ul>
+              </FormHelperText>
+            )}
 
-        {role == "teacher" ? (
-          <div className={styles.inputDiv}>
-            <label htmlFor="role">Subject</label>
             <Select
-              onChange={handleSubjectChange}
-              value={subject}
-              id="subject"
-              name="subject"
-              disabled={false}
+              value={role}
+              onChange={(_, newRole: any) => setRole(newRole)}
+              name="role"
               variant="outlined"
             >
-              <Option value={"Science"}>Science</Option>
-              <Option value={"Social"}>Social</Option>
-              <Option value={"Maths"}>Maths</Option>
-              <Option value={"English"}>English</Option>
-              <Option value={"Tamil"}>Tamil</Option>
+              <MenuItem value="teacher">Teacher</MenuItem>
+              <MenuItem value="student">Student</MenuItem>
             </Select>
-          </div>
-        ) : null}
 
-        <Button
-          startIcon={<Logout />}
-          variant="contained"
-          disabled={pending}
-          type="submit"
-        >
-          Sign Up
-        </Button>
-      </form>
+            {role === "teacher" && (
+              <Select
+                value={subject}
+                onChange={(_, newSub: any) => setSubject(newSub)}
+                name="subject"
+                variant="outlined"
+              >
+                <MenuItem value="Science">Science</MenuItem>
+                <MenuItem value="Social">Social</MenuItem>
+                <MenuItem value="Maths">Maths</MenuItem>
+                <MenuItem value="English">English</MenuItem>
+                <MenuItem value="Tamil">Tamil</MenuItem>
+              </Select>
+            )}
+
+            <Button
+              startIcon={<Logout />}
+              variant="contained"
+              disabled={pending}
+              type="submit"
+              sx={{
+                bgcolor: theme.palette.primary.main,
+                color: theme.palette.getContrastText(theme.palette.primary.main),
+              }}
+            >
+              Sign Up
+            </Button>
+
+            <Link href="/">
+              Already registered? Login
+            </Link>
+          </Stack>
+        </form>
+      </Paper>
     </div>
   );
 }

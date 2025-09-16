@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   CircularProgress,
+  Container,
   FormControl,
   InputLabel,
   MenuItem,
@@ -23,8 +24,12 @@ import {
   SubmitAssignmentAnswer
 } from "../lib/utils";
 import HeaderBar from "../lib/components/HeaderBar";
+import styles from "./dashboard.module.css"
+import { useThemeContext } from "../ThemeContext";
+
 
 export default function Studentboard() {
+  const {mode} = useThemeContext();
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
   const [alert, setAlert] = useState<{
     type: "success" | "error" | "warning";
@@ -180,7 +185,8 @@ export default function Studentboard() {
   });
 
   return (
-    <div>
+    <div className={mode == "light" ? styles.container : styles.container_dark}>
+
       <HeaderBar
   title="Student Dashboard"
   action={action}
@@ -188,8 +194,11 @@ export default function Studentboard() {
   student={studentData}
 />
 
+    <Container sx={{py:5}}>
 
-      <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+
+
+      <Box sx={{ display: "flex", gap: 2}}>
         <FormControl sx={{ minWidth: 150 }}>
           <InputLabel>Subject</InputLabel>
           <Select
@@ -247,6 +256,7 @@ export default function Studentboard() {
           />
         )}
       </Box>
+      </Container>
     </div>
   );
 }

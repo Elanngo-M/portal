@@ -15,6 +15,7 @@ import {
 import Logout from "@mui/icons-material/Logout";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import { Student, Teacher } from "../types";
+import { useThemeContext } from "@/app/ThemeContext";
 
 interface HeaderBarProps {
   title: string;
@@ -24,8 +25,12 @@ interface HeaderBarProps {
   student: Student | null;
 }
 
-export default function HeaderBar({ title, teacher, action, pending , student }: HeaderBarProps) {
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+
+export default function HeaderBar({ title, teacher, action, pending, student }: HeaderBarProps) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const { mode, toggleTheme } = useThemeContext();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -36,59 +41,65 @@ export default function HeaderBar({ title, teacher, action, pending , student }:
   };
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" sx={{ bgcolor: mode === 'light' ? 'primary.main' : 'background.default' }}>
       <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
-            <Typography variant="h6" sx={{ color: "white", mx: 2 }}>
+        <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="h6" sx={{ color: 'white', mx: 2 }}>
               {title}
             </Typography>
-            
           </Box>
 
-          <Box sx={{ flexGrow: 0 }}>
-            <IconButton
-              size="large"
-              edge="end"
-              color="inherit"
-              onClick={handleMenuOpen}
-            >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* Theme Toggle Button */}
+            <IconButton onClick={toggleTheme} color="inherit">
+              {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+            </IconButton>
+
+            {/* User Menu */}
+            <IconButton size="large" edge="end" color="inherit" onClick={handleMenuOpen}>
               <AccountCircle />
             </IconButton>
-              <Menu
-  anchorEl={anchorEl}
-  open={Boolean(anchorEl)}
-  onClose={handleMenuClose}
-  anchorOrigin={{ vertical: "top", horizontal: "right" }}
-  transformOrigin={{ vertical: "top", horizontal: "right" }}
-  sx={{ mt: 1 }}
->
-  <Box sx={{ px: 2, py: 1.5 , gap:2}}>
-    <Typography variant="subtitle1" fontWeight="bold">
-      {teacher?.name || student?.data.name}
-    </Typography>
-    <Typography variant="body2" color="text.secondary">
-      {teacher?.email || student?.email}
-    </Typography>
-    <Typography variant="subtitle2" fontWeight="semi-bold" >
-      {teacher?.subject}
-    </Typography>
-  
-    <form action={action}>
-      <Button
-        type="submit"
-        disabled={pending}
-        sx={{color: "black", width:'100%', justifyContent:'flex-start', display:'flex',padding:0, paddingY:1 }}
-      >
-        Logout
-      </Button>
-    </form>
-  </Box>
-</Menu>
 
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              sx={{ mt: 1 }}
+            >
+              <Box sx={{ px: 2, py: 1.5 }}>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  {teacher?.name || student?.data.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {teacher?.email || student?.email}
+                </Typography>
+                <Typography variant="subtitle2" fontWeight="semi-bold">
+                  {teacher?.subject}
+                </Typography>
+
+                <form action={action}>
+                  <Button
+                    type="submit"
+                    disabled={pending}
+                    sx={{
+                      width: '100%',
+                      justifyContent: 'flex-start',
+                      paddingY: 1,
+                      color: mode === 'light' ? 'text.primary' : 'white',
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </form>
+              </Box>
+            </Menu>
           </Box>
         </Toolbar>
       </Container>
     </AppBar>
   );
 }
+

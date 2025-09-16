@@ -1,0 +1,14 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  background: #e4f2fc;
+  min-height:100vh;
+}
+.container_dark {
+  position: relative; /* Add this */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(to right, #252424, #3f403f);
+}
+
