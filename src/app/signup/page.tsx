@@ -18,7 +18,7 @@ import {
 import { Logout, Visibility, VisibilityOff } from "@mui/icons-material";
 import { useActionState, useEffect, useState } from "react";
 import styles from "./signup.module.css";
-import { FormErrors, SingupFormState } from "../lib/types";
+import { FormErrors, SingupFormState, Student } from "../lib/types";
 import { useRouter } from "next/navigation";
 import { addStudent, addTeacher, isUserRegistered, useDB } from "../lib/utils";
 import { useThemeContext } from "../ThemeContext";
@@ -35,7 +35,7 @@ export default function SignupForm() {
   const [role, setRole] = useState<"teacher" | "student">("student");
   const [subject, setSubject] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
+  const [profileImage, setProfileImage] = useState<File | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -60,6 +60,11 @@ export default function SignupForm() {
     if (role === "teacher") {
       formData.append("subject", subject);
     }
+    if (profileImage) {
+      const imageBlob = new Blob([profileImage], { type: profileImage.type });
+  formData.append("profileImage", imageBlob);
+}
+
 
     const alreadyRegistered = await isUserRegistered(email, role);
 
@@ -73,6 +78,7 @@ export default function SignupForm() {
       email,
       password,
       role,
+      profileImage
     };
 
     if (role === "teacher") {
@@ -80,7 +86,19 @@ export default function SignupForm() {
       addTeacher(userData);
       localStorage.setItem("Current", JSON.stringify({ email: userData.email, role: userData.role }));
     } else {
-      addStudent(userData);
+      let student:Student = {
+        email:userData.email,
+        data:{
+          name:userData.name,
+          email:userData.email,
+          password:userData.password,
+          role:userData.role,
+          profileImage:userData.profileImage
+        },
+        assignments:[]
+      }
+      addStudent(student);
+      localStorage.setItem("Current", JSON.stringify({ email: userData.email, role: userData.role }));
     }
 
     const result = await signup(undefined, formData);
@@ -163,6 +181,29 @@ export default function SignupForm() {
                 </ul>
               </FormHelperText>
             )}
+            <TextField
+  type="file"
+  inputProps={{ accept: "image/*" }}
+  onChange={(e) => {
+    const target = e.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (file) {
+      setProfileImage(file);
+    }
+  }}
+  fullWidth
+  label="Upload Profile Image"
+  variant="outlined"
+/>
+
+{profileImage && (
+  <img
+    src={URL.createObjectURL(profileImage)}
+    alt="Preview"
+    style={{ width: "100px", height: "100px", objectFit: "cover", marginTop: "10px" }}
+  />
+)}
+
 
             <Select
               value={role}

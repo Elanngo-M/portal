@@ -102,19 +102,11 @@ export async function Login(state: FormState, formData: FormData) {
   const { email, password, role } = validatedFields.data;
   const isOld = await userRegisterd(email, role);
   const data = await getUserData(email, role, true);
-  if (!isOld) {
-    return {
-      errors: {
-        email: ["Email not registered!!"],
-      },
-    };
-  } else {
-    await createSession(email, role);
-    return {
-      success: true,
-      userData: data,
-    };
-  }
+  await createSession(email, role);
+  return {
+    success: true,
+    userData: data,
+  };
 }
 
 export async function Logout1(state: FormState, formData: FormData) {

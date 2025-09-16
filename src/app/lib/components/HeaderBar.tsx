@@ -1,21 +1,21 @@
 "use client";
 
-import React from "react";
+import { useThemeContext } from "@/app/ThemeContext";
+import AccountCircle from "@mui/icons-material/AccountCircle";
 import {
   AppBar,
-  Toolbar,
-  Container,
+  Avatar,
   Box,
   Button,
+  Container,
   IconButton,
   Menu,
-  MenuItem,
-  Typography,
+  Toolbar,
+  Typography
 } from "@mui/material";
-import Logout from "@mui/icons-material/Logout";
-import AccountCircle from "@mui/icons-material/AccountCircle";
+import Image from "next/image";
+import React, { useEffect } from "react";
 import { Student, Teacher } from "../types";
-import { useThemeContext } from "@/app/ThemeContext";
 
 interface HeaderBarProps {
   title: string;
@@ -25,10 +25,16 @@ interface HeaderBarProps {
   student: Student | null;
 }
 
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 
-export default function HeaderBar({ title, teacher, action, pending, student }: HeaderBarProps) {
+export default function HeaderBar({
+  title,
+  teacher,
+  action,
+  pending,
+  student,
+}: HeaderBarProps) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const { mode, toggleTheme } = useThemeContext();
 
@@ -40,33 +46,60 @@ export default function HeaderBar({ title, teacher, action, pending, student }: 
     setAnchorEl(null);
   };
 
+  const getProfileImageUrl = () => {
+    const blob = teacher?.profileImage || student?.data?.profileImage;
+    return blob ? URL.createObjectURL(blob) : null;
+  };
+
+  const profileImageUrl = getProfileImageUrl();
+
+  useEffect(() => {
+    return () => {
+      if (profileImageUrl) {
+        URL.revokeObjectURL(profileImageUrl);
+      }
+    };
+  }, [profileImageUrl]);
+
   return (
-    <AppBar position="static" sx={{ bgcolor: mode === 'light' ? 'primary.main' : 'background.default' }}>
+    <AppBar
+      position="static"
+      sx={{ bgcolor: mode === "light" ? "primary.main" : "background.default" }}
+    >
       <Container maxWidth="xl">
-        <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="h6" sx={{ color: 'white', mx: 2 }}>
+        <Toolbar disableGutters sx={{ justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Typography variant="h6" sx={{ color: "white", mx: 2 }}>
               {title}
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {/* Theme Toggle Button */}
             <IconButton onClick={toggleTheme} color="inherit">
-              {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+              {mode === "light" ? <Brightness4Icon /> : <Brightness7Icon />}
             </IconButton>
 
             {/* User Menu */}
-            <IconButton size="large" edge="end" color="inherit" onClick={handleMenuOpen}>
-              <AccountCircle />
+            <IconButton
+              size="large"
+              edge="end"
+              color="inherit"
+              onClick={handleMenuOpen}
+            >
+              {profileImageUrl ? (
+                <Avatar alt="Profile" src={profileImageUrl}/>
+              ) : (
+                <AccountCircle />
+              )}
             </IconButton>
 
             <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
-              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
               sx={{ mt: 1 }}
             >
               <Box sx={{ px: 2, py: 1.5 }}>
@@ -85,10 +118,10 @@ export default function HeaderBar({ title, teacher, action, pending, student }: 
                     type="submit"
                     disabled={pending}
                     sx={{
-                      width: '100%',
-                      justifyContent: 'flex-start',
+                      width: "100%",
+                      justifyContent: "flex-start",
                       paddingY: 1,
-                      color: mode === 'light' ? 'text.primary' : 'white',
+                      color: mode === "light" ? "text.primary" : "white",
                     }}
                   >
                     Logout
@@ -102,4 +135,3 @@ export default function HeaderBar({ title, teacher, action, pending, student }: 
     </AppBar>
   );
 }
-

@@ -61,7 +61,6 @@ export default function LoginForm({
     const role = formData.get("role") as "teacher" | "student"
 
     const alreadyRegistered = await isUserRegistered(email, role)
-
     if (!alreadyRegistered) {
       setLocalErrors({ email: ["Email not registered!!"] })
       return

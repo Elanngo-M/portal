@@ -439,6 +439,7 @@ export async function useDB() {
         teacherStore.createIndex("password", "password", { unique: false });
         teacherStore.createIndex("role", "role", { unique: false });
         teacherStore.createIndex("subject", "subject", { unique: false });
+        teacherStore.createIndex("profileImage", "profileImage", { unique: false });
 
         // Populate Teachers
         TeacherData.forEach((teacher) => {

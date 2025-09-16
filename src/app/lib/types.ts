@@ -104,6 +104,7 @@ export type Teacher = {
   password: any;
   role: "teacher";
   subject: any;
+  profileImage:any;
 };
 
 export type Student = {
@@ -113,6 +114,7 @@ export type Student = {
     email: any;
     password: any;
     role: any;
+    profileImage:any;
   };
   assignments: { name: any }[] | [];
 };
