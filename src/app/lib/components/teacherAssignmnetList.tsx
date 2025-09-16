@@ -150,13 +150,21 @@ export default function TeacherAssignmentList({
                             />
 
                             <Button
-                              sx={{ mt: 2 }}
-                              type="submit"
-                              disabled={ratePending}
-                              variant="contained"
-                            >
-                              Submit Grade
-                            </Button>
+  sx={{ mt: 2 }}
+  onClick={() => {
+    rateAction({
+      assignmentName: assignment.name,
+      studentName: submission.student,
+      rating: currentRating,
+      teacher: assignment.teacher,
+    });
+  }}
+  disabled={ratePending}
+  variant="contained"
+>
+  Submit Grade
+</Button>
+
                           </form>
                         ) : (
                           <>

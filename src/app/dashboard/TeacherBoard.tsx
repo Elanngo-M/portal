@@ -1,16 +1,10 @@
 "use client";
 
 import { Logout1 } from "@/app/actions/auth";
-import { RootState } from "@/redux_files/state/store";
-import { Logout } from "@mui/icons-material";
-import AdbIcon from "@mui/icons-material/Adb";
 import {
-  AppBar,
   Box,
   Button,
-  Container,
-  Toolbar,
-  Tabs,
+  Paper,
   Tab,
   Table,
   TableBody,
@@ -18,46 +12,48 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
+  Tabs
 } from "@mui/material";
+import { openDB } from "idb";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getAllStudent, getAssignment, getTeacher, setAllStudentReduxData, setTeacherReduxData } from "../lib/utils";
-import { SubmitRating } from "../actions/assignment";
+import { useDispatch } from "react-redux";
+import HeaderBar from "../lib/components/HeaderBar";
 import TeacherAssignmentList from "../lib/components/teacherAssignmnetList";
 import { assignment, Student, Teacher } from "../lib/types";
+import {
+  getAllStudent,
+  getAssignment,
+  getTeacher,
+  myDBversion
+} from "../lib/utils";
 
 export default function Teacherboard() {
-  const [teacher , setTeacher] = useState<Teacher | null>(null);
+  const [teacher, setTeacher] = useState<Teacher | null>(null);
   const router = useRouter();
   const dispatch = useDispatch();
 
   const [state, action, pending] = useActionState(Logout1, undefined);
-  const [rateState, rateAction, ratePending] = useActionState(
-    SubmitRating,
-    undefined
-  );
   const [rating, setRating] = useState<number>(0);
   const [studentData, setStudentData] = useState<Student[]>([]);
   const [assignments, setAssignments] = useState<assignment[]>([]);
   const [tabIndex, setTabIndex] = useState(0);
-  
-    useEffect(() => {
-      const fetchData = async () => {
-        let current: any = localStorage.getItem("Current");
-        current = JSON.parse(current);
-        const teach = await getTeacher(current.email);
-        const ass = (await getAssignment(current.email, "teacher")) ?? [];
-        const stu = await getAllStudent();
-        setTeacher(teach);
-        setAssignments(ass);
-        setStudentData(stu);
-      };
-  
-      fetchData();
-    }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let current: any = localStorage.getItem("Current");
+      current = JSON.parse(current);
+      const teach = await getTeacher(current.email);
+      const ass = (await getAssignment(current.email, "teacher")) ?? [];
+      const stu = await getAllStudent();
+      setTeacher(teach);
+      setAssignments(ass);
+      setStudentData(stu);
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (state?.success) {
@@ -66,7 +62,42 @@ export default function Teacherboard() {
     }
   }, [state, router]);
 
+  async function handleRatingSubmit({
+  assignmentName,
+  studentName,
+  rating,
+  teacher,
+}: {
+  assignmentName: string;
+  studentName: string;
+  rating: number;
+  teacher: string;
+}) {
+  try {
+    const assignmentIndex = assignments.findIndex(
+      (a) => a.name === assignmentName && a.teacher === teacher
+    );
 
+    if (assignmentIndex === -1) return;
+
+    const assignment = assignments[assignmentIndex];
+    const submissionIndex = assignment.submitted.findIndex(
+      (s) => s.student === studentName
+    );
+
+    if (submissionIndex === -1) return;
+
+    assignment.submitted[submissionIndex].grade = Number(rating);
+
+    const myDB = await openDB("MyDB", myDBversion);
+    await myDB.put("Assignments", assignment);
+
+    const AllAssignments = await getAssignment(teacher , "teacher");
+    setAssignments(AllAssignments);
+  } catch (error) {
+    console.error("Error submitting rating:", error);
+  }
+}
 
 
   const pendingAssignments = assignments.filter(
@@ -100,40 +131,6 @@ export default function Teacherboard() {
     `Name: ${teacher?.name}`,
     `Subject: ${teacher?.subject}`,
   ];
-
-  function ResponsiveAppBar() {
-    return (
-      <AppBar position="static">
-        <Container maxWidth="xl">
-          <Toolbar disableGutters>
-            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              {pages.map((page) => (
-                <Button
-                  key={page}
-                  sx={{ my: 2, color: "white", display: "block" }}
-                >
-                  {page}
-                </Button>
-              ))}
-            </Box>
-            <Box sx={{ flexGrow: 0 }}>
-              <form action={action}>
-                <Button
-                  startIcon={<Logout />}
-                  sx={{ my: 2, color: "white" }}
-                  type="submit"
-                  disabled={pending}
-                >
-                  Logout
-                </Button>
-              </form>
-            </Box>
-          </Toolbar>
-        </Container>
-      </AppBar>
-    );
-  }
 
   function StudentAnalyticsTable({
     students,
@@ -200,7 +197,13 @@ export default function Teacherboard() {
 
   return (
     <div>
-      <ResponsiveAppBar />
+      <HeaderBar
+        title="Teacher Dashboard"
+        teacher={teacher}
+        action={action}
+        pending={pending}
+        student={null}
+      />
 
       <Box sx={{ mt: 4 }}>
         <Tabs
@@ -231,8 +234,7 @@ export default function Teacherboard() {
         {tabIndex === 1 && (
           <TeacherAssignmentList
             assignments={pendingAssignmentsWithMissingStudents}
-            rateAction={rateAction}
-            ratePending={ratePending}
+            rateAction={handleRatingSubmit}
             students={studentData}
             showMissingStudents={true}
           />
@@ -241,8 +243,7 @@ export default function Teacherboard() {
         {tabIndex === 2 && (
           <TeacherAssignmentList
             assignments={nonGradedAssignments}
-            rateAction={rateAction}
-            ratePending={ratePending}
+            rateAction={handleRatingSubmit}
             students={studentData}
           />
         )}
@@ -250,8 +251,7 @@ export default function Teacherboard() {
         {tabIndex === 3 && (
           <TeacherAssignmentList
             assignments={gradedAssignments}
-            rateAction={rateAction}
-            ratePending={ratePending}
+            rateAction={handleRatingSubmit}
             students={studentData}
           />
         )}
@@ -259,3 +259,37 @@ export default function Teacherboard() {
     </div>
   );
 }
+
+// function ResponsiveAppBar() {
+//   return (
+//     <AppBar position="static">
+//       <Container maxWidth="xl">
+//         <Toolbar disableGutters>
+//           <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+//           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+//             {pages.map((page) => (
+//               <Button
+//                 key={page}
+//                 sx={{ my: 2, color: "white", display: "block" }}
+//               >
+//                 {page}
+//               </Button>
+//             ))}
+//           </Box>
+//           <Box sx={{ flexGrow: 0 }}>
+//             <form action={action}>
+//               <Button
+//                 startIcon={<Logout />}
+//                 sx={{ my: 2, color: "white" }}
+//                 type="submit"
+//                 disabled={pending}
+//               >
+//                 Logout
+//               </Button>
+//             </form>
+//           </Box>
+//         </Toolbar>
+//       </Container>
+//     </AppBar>
+//   );
+// }

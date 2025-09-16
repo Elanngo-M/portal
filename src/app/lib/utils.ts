@@ -7,7 +7,7 @@ import {
 import { setStudent, submitAssignment } from "@/redux_files/user/studentSlice";
 import { setTeacher } from "@/redux_files/user/TeacherSlice";
 import { assignment, assignmentSubmit, Student, Teacher } from "./types";
-const myDBversion = 3;
+export const myDBversion = 3;
 
 let TeacherData = [
   {

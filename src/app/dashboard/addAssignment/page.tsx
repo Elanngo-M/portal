@@ -2,6 +2,7 @@
 
 import { AddAssingmenttoStudent } from "@/app/actions/assignment";
 import { Logout1 } from "@/app/actions/auth";
+import HeaderBar from "@/app/lib/components/HeaderBar";
 import { assignment, Student, Teacher } from "@/app/lib/types";
 import {
   getAllStudent,
@@ -171,39 +172,12 @@ export default function AddAssignment() {
 
   return (
     <div>
-      <AppBar position="static">
-        <Container maxWidth="xl">
-          <Toolbar disableGutters>
-            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              {[
-                `Email: ${teacher?.email}`,
-                `Name: ${teacher?.name}`,
-                `Subject: ${teacher?.subject}`,
-              ].map((page) => (
-                <Button
-                  key={page}
-                  sx={{ my: 2, color: "white", display: "block" }}
-                >
-                  {page}
-                </Button>
-              ))}
-            </Box>
-            <Box sx={{ flexGrow: 0 }}>
-              <form action={action}>
-                <Button
-                  startIcon={<Logout />}
-                  sx={{ my: 2, color: "white" }}
-                  type="submit"
-                  disabled={pending}
-                >
-                  Logout
-                </Button>
-              </form>
-            </Box>
-          </Toolbar>
-        </Container>
-      </AppBar>
-
+      <HeaderBar
+        title="Assignment Adder"
+        teacher={teacher}
+        action={action}
+        pending={pending}
+      />
       <form  
       onSubmit={(event) => {
           event.preventDefault();

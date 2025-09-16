@@ -22,6 +22,7 @@ import {
   getStudent,
   SubmitAssignmentAnswer
 } from "../lib/utils";
+import HeaderBar from "../lib/components/HeaderBar";
 
 export default function Studentboard() {
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
@@ -180,29 +181,13 @@ export default function Studentboard() {
 
   return (
     <div>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Student Dashboard
-          </Typography>
-          <Box sx={{ textAlign: "right" }}>
-            <Typography variant="body2">Email: {studentData?.email}</Typography>
-            <Typography variant="body2">
-              Name: {studentData?.data.name}
-            </Typography>
-          </Box>
-          <form action={action} style={{ marginLeft: "10px" }}>
-            <Button
-              startIcon={<Logout />}
-              sx={{ my: 2, color: "white" }}
-              type="submit"
-              disabled={pending}
-            >
-              Logout
-            </Button>
-          </form>
-        </Toolbar>
-      </AppBar>
+      <HeaderBar
+  title="Student Dashboard"
+  action={action}
+  pending={pending}
+  student={studentData}
+/>
+
 
       <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
         <FormControl sx={{ minWidth: 150 }}>

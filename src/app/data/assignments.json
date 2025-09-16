@@ -112,7 +112,8 @@
     "submitted": [
       {
         "student": "myemail@gmail.com",
-        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat bibendum nibh, nec egestas eros sodales venenatis. Maecenas quis elementum mi. Ut mi erat, hendrerit in consectetur ac, mollis ut leo. Aliquam sollicitudin neque sed odio tempus consequat sit amet."
+        "answer": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat bibendum nibh, nec egestas eros sodales venenatis. Maecenas quis elementum mi. Ut mi erat, hendrerit in consectetur ac, mollis ut leo. Aliquam sollicitudin neque sed odio tempus consequat sit amet.",
+        "grade": 3.5
       }
     ]
   },
