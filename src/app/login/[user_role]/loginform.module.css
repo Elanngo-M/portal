@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(to right, #d6eeff, #aef9cb);
+  background: linear-gradient(to right top, #e4f2fc, #cae7fc, #afdcfd, #93d1fe, #74c6ff);
   padding: 2rem;
 }
 

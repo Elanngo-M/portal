@@ -168,6 +168,8 @@ export default function AssignmentAccordion({
               <Typography>{submission?.answer}</Typography>
               <Typography sx={{ mt: 2 }}>Grade:</Typography>
               <Rating value={submission?.grade} precision={0.5} readOnly />
+              <Typography sx={{ mt: 2 }}>Remarks:</Typography>
+              <Typography>{submission?.remarks}</Typography>
             </>
           )}
         </Paper>

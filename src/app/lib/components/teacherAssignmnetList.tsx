@@ -13,6 +13,8 @@ import {
   Card,
   Container,
   Divider,
+  TextField,
+  Input,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import React, { useState } from "react";
@@ -36,6 +38,8 @@ export default function TeacherAssignmentList({
 }: Props) {
   // Local rating state per submission
   const [ratings, setRatings] = useState<{ [key: string]: number }>({});
+  const [remarks, setRemarks] = useState<{ [key: string]: string }>({});
+
 
   // Helper to get student name from email
   const getStudentName = (email: string) => {
@@ -51,6 +55,11 @@ export default function TeacherAssignmentList({
   const handleRatingChange = (key: string, value: number | null) => {
     if (value !== null) {
       setRatings((prev) => ({ ...prev, [key]: value }));
+    }
+  };
+  const handleRemarksChange = (key: string, value: string | null) => {
+    if (value !== null) {
+      setRemarks((prev) => ({ ...prev, [key]: value }));
     }
   };
 
@@ -100,6 +109,7 @@ export default function TeacherAssignmentList({
             const studentName = getStudentName(submission.student);
             const key = getKey(assignment.name, submission.student);
             const currentRating = ratings[key] ?? submission.grade ?? 0;
+            const currentRemarks = remarks[key] ?? submission.remarks ?? "";
 
             return (
               <Accordion key={`${assignment.name}-${submission.student}-${index}`} sx={{ marginBottom: 2 }}>
@@ -125,14 +135,31 @@ export default function TeacherAssignmentList({
                           <input type="hidden" name="studentName" value={submission.student} />
                           <input type="hidden" name="rating" value={currentRating} />
                           <input type="hidden" name="teacher" value={assignment.teacher} />
+                          <input type="hidden" name="remarks" value={currentRemarks} />
+                          <div style={{display:'flex', flexDirection:'column', gap:5}}>
+                            <div style={{display:'flex', alignItems:'center'}}>
+                            <Rating
+                              name={`rating-${key}`}
+                              precision={0.5}
+                              value={currentRating}
+                              onChange={(event, newValue) => handleRatingChange(key, newValue)}
+                              sx={{ py:2 , mr:1}}
+                            />
+                            {currentRating > 0 ? 
+                            (<Button onClick={()=>handleRatingChange(key, 0)}>
+                              Clear
+                            </Button>):null
+                          
+                          }
+                            </div>
+                          <TextField
+  label="Remarks"
+  value={remarks[key] ?? ""}
+  onChange={(event) => handleRemarksChange(key, event.target.value)}
+  required
+/>
+                          </div>
 
-                          <Rating
-                            name={`rating-${key}`}
-                            precision={0.5}
-                            value={currentRating}
-                            onChange={(event, newValue) => handleRatingChange(key, newValue)}
-                            sx={{ mt: 2 }}
-                          />
 
                           <Button
                             sx={{ mt: 2 }}
@@ -141,6 +168,7 @@ export default function TeacherAssignmentList({
                                 assignmentName: assignment.name,
                                 studentName: submission.student,
                                 rating: currentRating,
+                                remarks:currentRemarks,
                                 teacher: assignment.teacher,
                               });
                             }}
@@ -157,6 +185,10 @@ export default function TeacherAssignmentList({
                           <strong>Grade:</strong>
                         </Typography>
                         <Rating value={submission.grade} readOnly />
+                        <Typography sx={{ mt: 2 }}>
+                          <strong>Remarks:</strong>
+                        </Typography>
+                        <Input type="text" value={submission.remarks} readOnly />
                       </>
                     )}
                   </Paper>

@@ -68,11 +68,13 @@ export default function Teacherboard() {
     studentName,
     rating,
     teacher,
+    remarks
   }: {
     assignmentName: string;
     studentName: string;
     rating: number;
     teacher: string;
+    remarks:string;
   }) {
     try {
       const assignmentIndex = assignments.findIndex(
@@ -89,7 +91,8 @@ export default function Teacherboard() {
       if (submissionIndex === -1) return;
 
       assignment.submitted[submissionIndex].grade = Number(rating);
-
+      assignment.submitted[submissionIndex].remarks = remarks;
+      console.log(remarks);
       const myDB = await openDB("MyDB", myDBversion);
       await myDB.put("Assignments", assignment);
 

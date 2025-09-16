@@ -9,6 +9,7 @@ import {
   getTeacher,
   writeAssignmentIDB,
 } from "@/app/lib/utils";
+import { useThemeContext } from "@/app/ThemeContext";
 import {
   CheckBoxOutlineBlank,
   CheckBoxOutlineBlankOutlined,
@@ -175,6 +176,7 @@ export default function AddAssignment() {
   };
 
   const theme = useTheme();
+  const { mode }= useThemeContext()
 
   return (
     <div>
@@ -182,10 +184,9 @@ export default function AddAssignment() {
       <Button
   variant="text"
   href="/dashboard"
-  sx={{
+  sx={[{
     alignSelf: "flex-start",
-    color:"black",
-    m: 2}}
+    m: 2}, mode=="light" ? {color:"black"} : {color:"white"}]}
 >Dashboard</Button>
     <Container maxWidth="sm">
       <Box
@@ -314,13 +315,22 @@ export default function AddAssignment() {
   margin="normal"
   required
   InputLabelProps={{ shrink: true }}
-  sx={{
+  sx={mode=="dark"?{
     '& input': {
       backgroundColor: 'transparent',
       color: 'inherit',
     },
     '& input::-webkit-calendar-picker-indicator': {
       filter: 'invert(1)', // Inverts the icon color for dark mode
+    },
+    '& input:-webkit-autofill': {
+      boxShadow: '0 0 0 1000px #f5f5f5 inset',
+      WebkitTextFillColor: '#000',
+    },
+  }:{
+    '& input': {
+      backgroundColor: 'transparent',
+      color: 'inherit',
     },
     '& input:-webkit-autofill': {
       boxShadow: '0 0 0 1000px #f5f5f5 inset',

@@ -84,6 +84,7 @@ export type assignment = {
         student: string;
         answer: string;
         grade: any;
+        remarks:any;
       }[]
     | [];
 };

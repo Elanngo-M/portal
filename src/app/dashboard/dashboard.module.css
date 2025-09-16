@@ -1,7 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  background: #e4f2fc;
+  background: linear-gradient(to right top, #e4f2fc, #cae7fc, #afdcfd, #93d1fe, #74c6ff);
   min-height:100vh;
 }
 .container_dark {
