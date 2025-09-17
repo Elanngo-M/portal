@@ -128,7 +128,7 @@ const [dueOrder, setDueOrder] = useState("asc");
 };
 
 
-  const filteredAssignments = assignments
+const filteredAssignments = assignments
   .filter((a) =>
     a.name.toLowerCase().includes(assignmentNameFilter.toLowerCase())
   )
@@ -140,30 +140,37 @@ const [dueOrder, setDueOrder] = useState("asc");
 
     const submittedEmails = submittedStudents.map((s) => s.student);
 
+    // Filter submitted students by name
     const filteredSubmittedStudents = submittedStudents.filter((s) =>
       s.name.toLowerCase().includes(studentNameFilter.toLowerCase())
     );
 
-    const filteredAssignedStudents = a.assignedStudents
-      .map((email: string) => ({
-        email,
-        name: getStudentName(email),
-      }))
+    // Filter assigned students by name
+    const filteredAssignedStudents = a.assignedStudents.map((email: string) => ({
+      email,
+      name: getStudentName(email),
+    }));
+
+    // Filter missing students from assigned list
+    const filteredMissingStudents = filteredAssignedStudents
+      .filter((s) => !submittedEmails.includes(s.email))
       .filter((s) =>
         s.name.toLowerCase().includes(studentNameFilter.toLowerCase())
       );
 
-    const filteredMissingStudents = filteredAssignedStudents.filter(
-      (s) => !submittedEmails.includes(s.email)
-    );
+    // Only include this assignment if there's at least one matching student
+    const hasMatchingStudent =
+      filteredSubmittedStudents.length > 0 || filteredMissingStudents.length > 0;
+
+    if (!hasMatchingStudent) return null;
 
     return {
       ...a,
-      submittedStudents,
       filteredSubmittedStudents,
       filteredMissingStudents,
     };
-  });
+  })
+  .filter(Boolean); // Remove nulls
 
 
   const pendingAssignments = filteredAssignments.filter(
@@ -171,19 +178,33 @@ const [dueOrder, setDueOrder] = useState("asc");
 );
 
 
-  const pendingAssignmentsWithMissingStudents = pendingAssignments.map((assignment: any) => ({
+
+const pendingAssignmentsWithMissingStudents = pendingAssignments.map((assignment: any) => ({
   ...assignment,
   missingStudents: assignment.filteredMissingStudents,
 }));
+
 
 
   const nonGradedAssignments = filteredAssignments.filter((a: any) =>
   a.filteredSubmittedStudents.some((s: any) => s.grade == null)
 );
 
-const gradedAssignments = filteredAssignments.filter((a: any) =>
-  a.filteredSubmittedStudents.some((s: any) => s.grade != null)
-);
+const gradedAssignments = filteredAssignments
+  .map((a: any) => {
+    const gradedFilteredStudents = a.filteredSubmittedStudents.filter(
+      (s: any) => s.grade != null
+    );
+
+    if (gradedFilteredStudents.length === 0) return null;
+
+    return {
+      ...a,
+      filteredSubmittedStudents: gradedFilteredStudents,
+    };
+  })
+  .filter(Boolean);
+
 
 
   const pages = [
@@ -295,23 +316,12 @@ const gradedAssignments = filteredAssignments.filter((a: any) =>
   value={studentNameFilter}
   onChange={(e) => {
     const value = e.target.value;
-    console.log("Student Name Filter Changed:", value); // ✅ Add this
+    console.log("Student Name Filter Changed:", value); 
     setStudentNameFilter(value);
-    localStorage.setItem("studentNameFilter", value); // Optional: persist
+    localStorage.setItem("studentNameFilter", value); 
   }}
 />
 
-  <FormControl sx={{ minWidth: 150 }}>
-    <InputLabel>Due Date</InputLabel>
-    <Select
-      value={dueOrder}
-      label="Due Date"
-      onChange={(e) => setDueOrder(e.target.value)}
-    >
-      <MenuItem value="asc">Earliest First</MenuItem>
-      <MenuItem value="desc">Latest First</MenuItem>
-    </Select>
-  </FormControl>
 </Box> : null}
 
           {tabIndex === 0 && (
