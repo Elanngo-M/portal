@@ -5,7 +5,11 @@ import {
   Box,
   Button,
   Container,
+  FormControl,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   Tab,
   Table,
   TableBody,
@@ -14,6 +18,7 @@ import {
   TableHead,
   TableRow,
   Tabs,
+  TextField,
 } from "@mui/material";
 import { openDB } from "idb";
 import Link from "next/link";
@@ -40,6 +45,10 @@ export default function Teacherboard() {
   const [studentData, setStudentData] = useState<Student[]>([]);
   const [assignments, setAssignments] = useState<assignment[]>([]);
   const [tabIndex, setTabIndex] = useState(0);
+  const [assignmentNameFilter, setAssignmentNameFilter] = useState("");
+const [studentNameFilter, setStudentNameFilter] = useState("");
+const [dueOrder, setDueOrder] = useState("asc");
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,6 +71,16 @@ export default function Teacherboard() {
       router.push("/login");
     }
   }, [state, router]);
+  useEffect(() => {
+  const storedAssignmentName = localStorage.getItem("assignmentNameFilter") || "";
+  const storedStudentName = localStorage.getItem("studentNameFilter") || "";
+  const storedDueOrder = localStorage.getItem("dueOrder") || "asc";
+
+  setAssignmentNameFilter(storedAssignmentName);
+  setStudentNameFilter(storedStudentName);
+  setDueOrder(storedDueOrder);
+}, []);
+
 
   async function handleRatingSubmit({
     assignmentName,
@@ -103,31 +122,69 @@ export default function Teacherboard() {
     }
   }
 
-  const pendingAssignments = assignments.filter(
-    (a: any) => a.submitted.length < a.assignedStudents.length
-  );
+  const getStudentName = (email: string): string => {
+  const student = studentData.find((s) => s.email === email);
+  return student?.data?.name || "Unknown Student";
+};
 
-  const pendingAssignmentsWithMissingStudents = pendingAssignments.map(
-    (assignment: any) => {
-      const submittedEmails = assignment.submitted.map((s: any) => s.student);
-      const missingStudents = assignment.assignedStudents.filter(
-        (email: string) => !submittedEmails.includes(email)
+
+  const filteredAssignments = assignments
+  .filter((a) =>
+    a.name.toLowerCase().includes(assignmentNameFilter.toLowerCase())
+  )
+  .map((a) => {
+    const submittedStudents = a.submitted.map((s: any) => ({
+      ...s,
+      name: getStudentName(s.student),
+    }));
+
+    const submittedEmails = submittedStudents.map((s) => s.student);
+
+    const filteredSubmittedStudents = submittedStudents.filter((s) =>
+      s.name.toLowerCase().includes(studentNameFilter.toLowerCase())
+    );
+
+    const filteredAssignedStudents = a.assignedStudents
+      .map((email: string) => ({
+        email,
+        name: getStudentName(email),
+      }))
+      .filter((s) =>
+        s.name.toLowerCase().includes(studentNameFilter.toLowerCase())
       );
 
-      return {
-        ...assignment,
-        missingStudents,
-      };
-    }
-  );
+    const filteredMissingStudents = filteredAssignedStudents.filter(
+      (s) => !submittedEmails.includes(s.email)
+    );
 
-  const nonGradedAssignments = assignments.filter((a: any) =>
-    a.submitted.some((s: any) => s.grade == null)
-  );
+    return {
+      ...a,
+      submittedStudents,
+      filteredSubmittedStudents,
+      filteredMissingStudents,
+    };
+  });
 
-  const gradedAssignments = assignments.filter((a: any) =>
-    a.submitted.some((s: any) => s.grade != null)
-  );
+
+  const pendingAssignments = filteredAssignments.filter(
+  (a: any) => a.filteredMissingStudents.length > 0
+);
+
+
+  const pendingAssignmentsWithMissingStudents = pendingAssignments.map((assignment: any) => ({
+  ...assignment,
+  missingStudents: assignment.filteredMissingStudents,
+}));
+
+
+  const nonGradedAssignments = filteredAssignments.filter((a: any) =>
+  a.filteredSubmittedStudents.some((s: any) => s.grade == null)
+);
+
+const gradedAssignments = filteredAssignments.filter((a: any) =>
+  a.filteredSubmittedStudents.some((s: any) => s.grade != null)
+);
+
 
   const pages = [
     `Email: ${teacher?.email}`,
@@ -209,7 +266,11 @@ export default function Teacherboard() {
           student={null}
         />
 
+        <Container>
+          
         <Box sx={{ mt: 4 }}>
+          
+
           <Tabs
             value={tabIndex}
             onChange={(e, newValue) => setTabIndex(newValue)}
@@ -221,6 +282,37 @@ export default function Teacherboard() {
             <Tab label={`Non-Graded (${nonGradedAssignments.length})`} />
             <Tab label={`Graded (${gradedAssignments.length})`} />
           </Tabs>
+          {tabIndex !=0 ? <Box sx={{ display: "flex", gap: 2, my: 2 }}>
+  <TextField
+    label="Assignment Name"
+    variant="outlined"
+    value={assignmentNameFilter}
+    onChange={(e) => setAssignmentNameFilter(e.target.value)}
+  />
+  <TextField
+  label="Student Name"
+  variant="outlined"
+  value={studentNameFilter}
+  onChange={(e) => {
+    const value = e.target.value;
+    console.log("Student Name Filter Changed:", value); // ✅ Add this
+    setStudentNameFilter(value);
+    localStorage.setItem("studentNameFilter", value); // Optional: persist
+  }}
+/>
+
+  <FormControl sx={{ minWidth: 150 }}>
+    <InputLabel>Due Date</InputLabel>
+    <Select
+      value={dueOrder}
+      label="Due Date"
+      onChange={(e) => setDueOrder(e.target.value)}
+    >
+      <MenuItem value="asc">Earliest First</MenuItem>
+      <MenuItem value="desc">Latest First</MenuItem>
+    </Select>
+  </FormControl>
+</Box> : null}
 
           {tabIndex === 0 && (
             <Container>
@@ -260,6 +352,8 @@ export default function Teacherboard() {
             />
           )}
         </Box>
+        
+        </Container>
       </div>
     </div>
   );

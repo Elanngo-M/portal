@@ -9,6 +9,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -44,6 +45,8 @@ export default function Studentboard() {
   const [loadingTabs, setLoadingTabs] = useState(false);
   const [studentData, setStudentData] = useState<Student | null>(null);
   const [assignments, setAssignments] = useState<assignment[]>([]);
+  const [assignmentNameFilter, setAssignmentNameFilter] = useState("");
+
 
   const [loading, setLoading] = useState(true);
 
@@ -61,6 +64,11 @@ export default function Studentboard() {
 
     fetchData();
   }, []);
+  useEffect(() => {
+  const savedNameFilter = localStorage.getItem("assignmentNameFilter") || "";
+  setAssignmentNameFilter(savedNameFilter);
+}, []);
+
 
   // useEffect(() => {
   //   setStudentReduxData(dispatch);
@@ -159,12 +167,16 @@ export default function Studentboard() {
 
   const subjects = Array.from(new Set(assignments.map((a) => a.subject)));
   const filteredAssignments = assignments
-    .filter((a) => subjectFilter === "All" || a.subject === subjectFilter)
-    .sort((a, b) => {
-      const dateA = new Date(a.dueDate).getTime();
-      const dateB = new Date(b.dueDate).getTime();
-      return dueOrder === "asc" ? dateA - dateB : dateB - dateA;
-    });
+  .filter((a) =>
+    (subjectFilter === "All" || a.subject === subjectFilter) &&
+    a.name.toLowerCase().includes(assignmentNameFilter.toLowerCase())
+  )
+  .sort((a, b) => {
+    const dateA = new Date(a.dueDate).getTime();
+    const dateB = new Date(b.dueDate).getTime();
+    return dueOrder === "asc" ? dateA - dateB : dateB - dateA;
+  });
+
 
   const pendingAssignments = filteredAssignments.filter(
     (a) => !a.submitted?.some((s) => s.student === studentData?.email)
@@ -183,6 +195,8 @@ export default function Studentboard() {
     );
     return submission && submission.grade == null;
   });
+
+  const isFilterApplied = subjectFilter === "All" ? true : false;
 
   return (
     <div className={mode == "light" ? styles.container : styles.container_dark}>
@@ -231,6 +245,20 @@ export default function Studentboard() {
             <MenuItem value="desc">Latest First</MenuItem>
           </Select>
         </FormControl>
+        <FormControl sx={{ minWidth: 200 }}>
+  <TextField
+    label="Assignment Name"
+    variant="outlined"
+    value={assignmentNameFilter}
+    onChange={(e) => {
+      const value = e.target.value;
+      setAssignmentNameFilter(value);
+      localStorage.setItem("assignmentNameFilter", value);
+    }}
+    fullWidth
+  />
+</FormControl>
+
       </Box>
 
       {/* Tabs */}
@@ -253,6 +281,7 @@ export default function Studentboard() {
             answers={answers}
             setAnswers={setAnswers}
             onSubmit={submitAss}
+            isFilterApplied={isFilterApplied}
           />
         )}
       </Box>

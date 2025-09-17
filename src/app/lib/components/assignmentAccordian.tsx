@@ -30,6 +30,7 @@ export default function AssignmentAccordion({
   setAnswers,
   onSubmit,
   notSubmittedStudents = [],
+  isFilterApplied = false,
 }: {
   assignment: assignment;
   studentEmail: string;
@@ -44,6 +45,7 @@ export default function AssignmentAccordion({
     setLocalAlert: any
   ) => void;
   notSubmittedStudents?: string[];
+  isFilterApplied:boolean;
 }) {
   const submission = assignment.submitted?.find(
     (s) => s.student === studentEmail
@@ -74,7 +76,7 @@ export default function AssignmentAccordion({
     <Accordion key={assignment.name}>
       <AccordionSummary expandIcon={<ExpandMore />}>
         <Typography>{assignment.name}</Typography>
-        <Typography mx={5}>({assignment.subject})</Typography>
+        {isFilterApplied ? (<Typography mx={5}>({assignment.subject})</Typography>) : null}
         {type === "pending" && (
           <Typography mx={5}>
             {daysLeft >= 0

@@ -89,13 +89,14 @@ export default function TeacherAssignmentList({
                 </Typography>
               ) : (
                 <Stack spacing={1}>
-                  {assignment.missingStudents.map((email: string) => (
-                    <Paper key={email} variant="outlined" sx={{ padding: 1 }}>
-                      <Typography variant="body2">
-                        <strong>{getStudentName(email)}</strong> — <em>{email}</em>
-                      </Typography>
-                    </Paper>
-                  ))}
+                  {assignment.missingStudents.map((student: any) => (
+  <Paper key={student.email} variant="outlined" sx={{ padding: 1 }}>
+    <Typography variant="body2">
+      <strong>{student.name}</strong> — <em>{student.email}</em>
+    </Typography>
+  </Paper>
+))}
+
                 </Stack>
               )}
             </AccordionDetails>

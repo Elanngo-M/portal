@@ -14,6 +14,7 @@ export default function AssignmentTabs({
   answers,
   setAnswers,
   onSubmit,
+  isFilterApplied = false,
 }:any) {
   return (
     <>
@@ -37,6 +38,7 @@ export default function AssignmentTabs({
                 answer={answers[assignment.name]}
                 setAnswers={setAnswers}
                 onSubmit={onSubmit}
+                isFilterApplied={isFilterApplied}
               />
             ))
           ))}
@@ -51,6 +53,7 @@ export default function AssignmentTabs({
                 assignment={assignment}
                 studentEmail={studentEmail}
                 type="submitted"
+                isFilterApplied = {isFilterApplied}
               />
             ))
           ))}
@@ -65,6 +68,7 @@ export default function AssignmentTabs({
                 assignment={assignment}
                 studentEmail={studentEmail}
                 type="graded"
+                isFilterApplied={isFilterApplied}
               />
             ))
           ))}
